@@ -1,3 +1,4 @@
+
 # clean-code-javascript
 
 ## Table of Contents
@@ -22,8 +23,8 @@ you shout when reading code](https://www.osnews.com/images/comics/wtfm.jpg)
 
 Software engineering principles, from Robert C. Martin's book
 [_Clean Code_](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882),
-adapted for JavaScript. This is not a style guide. It's a guide to producing
-[readable, reusable, and refactorable](https://github.com/ryanmcdermott/3rs-of-software-architecture) software in JavaScript.
+adapted for C#. This is not a style guide. It's a guide to producing
+[readable, reusable, and refactorable](https://github.com/ryanmcdermott/3rs-of-software-architecture) software in C#.
 
 Not every principle herein has to be strictly followed, and even fewer will be
 universally agreed upon. These are guidelines and nothing more, but they are
@@ -34,7 +35,7 @@ Our craft of software engineering is just a bit over 50 years old, and we are
 still learning a lot. When software architecture is as old as architecture
 itself, maybe then we will have harder rules to follow. For now, let these
 guidelines serve as a touchstone by which to assess the quality of the
-JavaScript code that you and your team produce.
+C# code that you and your team produce.
 
 One more thing: knowing these won't immediately make you a better software
 developer, and working with them for many years doesn't mean you won't make
@@ -49,14 +50,14 @@ improvement. Beat up the code instead!
 
 **Bad:**
 
-```javascript
-const yyyymmdstr = moment().format("YYYY/MM/DD");
+```csharp
+var yyyymmdstr = DateTime.Now.ToString("YYYY/MM/DD");
 ```
 
 **Good:**
 
-```javascript
-const currentDate = moment().format("YYYY/MM/DD");
+```csharp
+var currentDate = DateTime.Now.ToString("YYYY/MM/DD");
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -65,7 +66,7 @@ const currentDate = moment().format("YYYY/MM/DD");
 
 **Bad:**
 
-```javascript
+```csharp
 getUserInfo();
 getClientData();
 getCustomerRecord();
@@ -73,36 +74,62 @@ getCustomerRecord();
 
 **Good:**
 
-```javascript
+```csharp
 getUser();
+getClient();
+getCustomer();
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
-### Use searchable names
-
-We will read more code than we will ever write. It's important that the code we
-do write is readable and searchable. By _not_ naming variables that end up
-being meaningful for understanding our program, we hurt our readers.
-Make your names searchable. Tools like
-[buddy.js](https://github.com/danielstjules/buddy.js) and
-[ESLint](https://github.com/eslint/eslint/blob/660e0918933e6e7fede26bc675a0763a6b357c94/docs/rules/no-magic-numbers.md)
-can help identify unnamed constants.
+### Avoid magic strings and numbers
+-   Leads to repetition.
+-   Makes understanding the code harder.
+-   Changing a single value will require a lot of searching and replacing.
 
 **Bad:**
 
-```javascript
-// What the heck is 86400000 for?
-setTimeout(blastOff, 86400000);
+```csharp
+// What the heck is 6 and 15 for?
+// What is not allowed?
+if(value < 6 || value > 15) {
+	return  "Not allowed";
+}
 ```
 
 **Good:**
 
-```javascript
-// Declare them as capitalized named constants.
-const MILLISECONDS_PER_DAY = 60 * 60 * 24 * 1000; //86400000;
+```csharp
+// 6 and 15 are minimum and maximum ages.
+const int MinAge = 6;
+const int MaxValue = 15;
+const string NotAllowedAgeMessage = "Not allowed";
 
-setTimeout(blastOff, MILLISECONDS_PER_DAY);
+if(value < MinValue || value > MaxValue) {
+	return NotAllowedAgeMessage;
+}
+```
+
+### Meaningful Names
+We will read more code than we will ever write. It's important that the code we
+do write is readable and searchable. By _not_ naming variables that end up
+being meaningful for understanding our program, we hurt our readers.
+Make your names searchable.
+
+**Bad:**
+
+```csharp
+// What the heck is 86400000 for?
+var d = ms % 86400000;
+```
+
+**Good:**
+
+```csharp
+// Declare them as capitalized named constants.
+const int MilliSecondsPerDay = 60 * 60 * 24 * 1000; //86400000;
+
+var days = milliSeconds % MilliSecondsPerDay;
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -111,21 +138,24 @@ setTimeout(blastOff, MILLISECONDS_PER_DAY);
 
 **Bad:**
 
-```javascript
-const address = "One Infinite Loop, Cupertino 95014";
-const cityZipCodeRegex = /^[^,\\]+[,\\\s]+(.+?)\s*(\d{5})?$/;
+```csharp
+var address = "One Infinite Loop, Cupertino 95014";
+var cityZipCodeRegex = new Regex("^[^,\\\\]+[,\\\\\\s]+(.+?)\\s*(\\d{5})?$");
 saveCityZipCode(
-  address.match(cityZipCodeRegex)[1],
-  address.match(cityZipCodeRegex)[2]
+  cityZipCodeRegex.Match(address).Captures[1],
+  cityZipCodeRegex.Match(address).Captures[2]
 );
 ```
 
 **Good:**
 
-```javascript
-const address = "One Infinite Loop, Cupertino 95014";
-const cityZipCodeRegex = /^[^,\\]+[,\\\s]+(.+?)\s*(\d{5})?$/;
-const [_, city, zipCode] = address.match(cityZipCodeRegex) || [];
+```csharp
+var address = "One Infinite Loop, Cupertino 95014";
+var cityZipCodeRegex = new Regex("^[^,\\\\]+[,\\\\\\s]+(.+?)\\s*(\\d{5})?$");
+
+var city = cityZipCodeRegex.Match(address).Captures[1];
+var zipCode = cityZipCodeRegex.Match(address).Captures[2];
+
 saveCityZipCode(city, zipCode);
 ```
 
@@ -137,29 +167,22 @@ Explicit is better than implicit.
 
 **Bad:**
 
-```javascript
-const locations = ["Austin", "New York", "San Francisco"];
-locations.forEach(l => {
+```csharp
+var locations = new List<string> {"Austin", "New York", "San Francisco"};
+locations.ForEach(l => {
   doStuff();
   doSomeOtherStuff();
-  // ...
-  // ...
-  // ...
-  // Wait, what is `l` for again?
   dispatch(l);
 });
 ```
 
 **Good:**
 
-```javascript
-const locations = ["Austin", "New York", "San Francisco"];
-locations.forEach(location => {
+```csharp
+var locations = new List<string> {"Austin", "New York", "San Francisco"};
+locations.ForEach(location => {
   doStuff();
   doSomeOtherStuff();
-  // ...
-  // ...
-  // ...
   dispatch(location);
 });
 ```
@@ -173,116 +196,58 @@ variable name.
 
 **Bad:**
 
-```javascript
-const Car = {
-  carMake: "Honda",
-  carModel: "Accord",
-  carColor: "Blue"
-};
+```csharp
+class Car {
+  public string CarMaker { get; set; }
+  public string CarAccord { get; set; }
+  public string CarColor { get; set; }
 
-function paintCar(car, color) {
-  car.carColor = color;
-}
+  public void PaintCar(string color) {
+    CarColor = color;
+  }
+};
 ```
 
 **Good:**
 
-```javascript
-const Car = {
-  make: "Honda",
-  model: "Accord",
-  color: "Blue"
+```csharp
+class Car {
+  public string Maker { get; set; }
+  public string Accord { get; set; }
+  public string Color { get; set; }
+
+  public void Paint(string color) {
+    this.Color = color;
+  }
 };
-
-function paintCar(car, color) {
-  car.color = color;
-}
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Use default arguments instead of short circuiting or conditionals
-
-Default arguments are often cleaner than short circuiting. Be aware that if you
-use them, your function will only provide default values for `undefined`
-arguments. Other "falsy" values such as `''`, `""`, `false`, `null`, `0`, and
-`NaN`, will not be replaced by a default value.
-
-**Bad:**
-
-```javascript
-function createMicrobrewery(name) {
-  const breweryName = name || "Hipster Brew Co.";
-  // ...
-}
-```
-
-**Good:**
-
-```javascript
-function createMicrobrewery(name = "Hipster Brew Co.") {
-  // ...
-}
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
 ## **Functions**
 
-### Function arguments (2 or fewer ideally)
+### Arguments
 
-Limiting the amount of function parameters is incredibly important because it
-makes testing your function easier. Having more than three leads to a
-combinatorial explosion where you have to test tons of different cases with
-each separate argument.
+-   A function that needs no argument is the best type of functions.
+-   The more the the argument number increase, the harder the function is to understand and maintain.
+-   Too many arguments could be caused by a bad architecture and design.
+-   Too many arguments could mean that the function has too many responsibilities.  
+-   When adding an argument to a function, make sure you’re not breaking OOP principles.
 
-One or two arguments is the ideal case, and three should be avoided if possible.
-Anything more than that should be consolidated. Usually, if you have
-more than two arguments then your function is trying to do too much. In cases
-where it's not, most of the time a higher-level object will suffice as an
-argument.
-
-Since JavaScript allows you to make objects on the fly, without a lot of class
-boilerplate, you can use an object if you are finding yourself needing a
-lot of arguments.
-
-To make it obvious what properties the function expects, you can use the ES2015/ES6
-destructuring syntax. This has a few advantages:
-
-1. When someone looks at the function signature, it's immediately clear what
-   properties are being used.
-2. It can be used to simulate named parameters.
-3. Destructuring also clones the specified primitive values of the argument
-   object passed into the function. This can help prevent side effects. Note:
-   objects and arrays that are destructured from the argument object are NOT
-   cloned.
-4. Linters can warn you about unused properties, which would be impossible
-   without destructuring.
+-   Closely related arguments should become a single object, for example:
 
 **Bad:**
 
-```javascript
-function createMenu(title, body, buttonText, cancellable) {
-  // ...
-}
-
-createMenu("Foo", "Bar", "Baz", true);
-
+```csharp
+void Register(string country, string city)
+float GetMagnitude(int x, int y)
 ```
 
 **Good:**
 
-```javascript
-function createMenu({ title, body, buttonText, cancellable }) {
-  // ...
-}
-
-createMenu({
-  title: "Foo",
-  body: "Bar",
-  buttonText: "Baz",
-  cancellable: true
-});
+```csharp
+void Register(Address address)
+float GetMagnitude(Point p)
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -297,20 +262,25 @@ this guide other than this, you'll be ahead of many developers.
 
 **Bad:**
 
-```javascript
-function emailClients(clients) {
-  clients.forEach(client => {
-    const clientRecord = database.lookup(client);
-    if (clientRecord.isActive()) {
-      email(client);
+```csharp
+void EmailClients(Client[] clients)
+{
+    foreach (var client in clients)
+    {
+        var clientRecord = database.Find(c => c.Id == client.Id && c.IsActive);
+        if (clientRecord != null)
+        {
+            var emailBody = "Thank you for the registration. Your number is " +
+				             client.RefNumber;
+            SendEmail(client.Email, App.EmailFrom, emailBody);
+        }
     }
-  });
 }
 ```
 
 **Good:**
 
-```javascript
+```csharp
 function emailActiveClients(clients) {
   clients.filter(isActiveClient).forEach(email);
 }
@@ -2351,35 +2321,4 @@ const actions = function() {
   // ...
 };
 ```
-
-**[⬆ back to top](#table-of-contents)**
-
-## Translation
-
-This is also available in other languages:
-
-- ![am](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Armenia.png) **Armenian**: [hanumanum/clean-code-javascript/](https://github.com/hanumanum/clean-code-javascript)
-- ![bd](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Bangladesh.png) **Bangla(বাংলা)**: [InsomniacSabbir/clean-code-javascript/](https://github.com/InsomniacSabbir/clean-code-javascript/)
-- ![br](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Brazil.png) **Brazilian Portuguese**: [fesnt/clean-code-javascript](https://github.com/fesnt/clean-code-javascript)
-- ![cn](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/China.png) **Simplified Chinese**:
-  - [alivebao/clean-code-js](https://github.com/alivebao/clean-code-js)
-  - [beginor/clean-code-javascript](https://github.com/beginor/clean-code-javascript)
-- ![tw](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Taiwan.png) **Traditional Chinese**: [AllJointTW/clean-code-javascript](https://github.com/AllJointTW/clean-code-javascript)
-- ![fr](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/France.png) **French**: [GavBaros/clean-code-javascript-fr](https://github.com/GavBaros/clean-code-javascript-fr)
-- ![de](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Germany.png) **German**: [marcbruederlin/clean-code-javascript](https://github.com/marcbruederlin/clean-code-javascript)
-- ![id](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Indonesia.png) **Indonesia**: [andirkh/clean-code-javascript/](https://github.com/andirkh/clean-code-javascript/)
-- ![it](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Italy.png) **Italian**: [frappacchio/clean-code-javascript/](https://github.com/frappacchio/clean-code-javascript/)
-- ![ja](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Japan.png) **Japanese**: [mitsuruog/clean-code-javascript/](https://github.com/mitsuruog/clean-code-javascript/)
-- ![kr](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/South-Korea.png) **Korean**: [qkraudghgh/clean-code-javascript-ko](https://github.com/qkraudghgh/clean-code-javascript-ko)
-- ![pl](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Poland.png) **Polish**: [greg-dev/clean-code-javascript-pl](https://github.com/greg-dev/clean-code-javascript-pl)
-- ![ru](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Russia.png) **Russian**:
-  - [BoryaMogila/clean-code-javascript-ru/](https://github.com/BoryaMogila/clean-code-javascript-ru/)
-  - [maksugr/clean-code-javascript](https://github.com/maksugr/clean-code-javascript)
-- ![es](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Spain.png) **Spanish**: [tureey/clean-code-javascript](https://github.com/tureey/clean-code-javascript)
-- ![es](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Uruguay.png) **Spanish**: [andersontr15/clean-code-javascript](https://github.com/andersontr15/clean-code-javascript-es)
-- ![rs](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Serbia.png) **Serbian**: [doskovicmilos/clean-code-javascript/](https://github.com/doskovicmilos/clean-code-javascript)
-- ![tr](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Turkey.png) **Turkish**: [bsonmez/clean-code-javascript](https://github.com/bsonmez/clean-code-javascript/tree/turkish-translation)
-- ![ua](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Ukraine.png) **Ukrainian**: [mindfr1k/clean-code-javascript-ua](https://github.com/mindfr1k/clean-code-javascript-ua)
-- ![vi](https://raw.githubusercontent.com/gosquared/flags/master/flags/flags/shiny/24/Vietnam.png) **Vietnamese**: [hienvd/clean-code-javascript/](https://github.com/hienvd/clean-code-javascript/)
-
 **[⬆ back to top](#table-of-contents)**
