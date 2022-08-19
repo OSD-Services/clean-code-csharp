@@ -6,15 +6,12 @@
 1. [Introduction](#introduction)
 2. [Variables](#variables)
 3. [Functions](#functions)
-4. [Objects and Data Structures](#objects-and-data-structures)
-5. [Classes](#classes)
-6. [SOLID](#solid)
-7. [Testing](#testing)
-8. [Concurrency](#concurrency)
-9. [Error Handling](#error-handling)
-10. [Formatting](#formatting)
-11. [Comments](#comments)
-12. [Translation](#translation)
+4. [Classes](#classes)
+5. [SOLID](#solid)
+6. [Testing](#testing)
+7. [Error Handling](#error-handling)
+8. [Formatting](#formatting)
+9. [Comments](#comments)
 
 ## Introduction
 
@@ -654,300 +651,73 @@ class Cessna extends Airplane {
 
 **[⬆ back to top](#table-of-contents)**
 
-## **Objects and Data Structures**
+## **Classes**
 
-### Use getters and setters
+### Use getters and setters and make all fields private.
 
-Using getters and setters to access data on objects could be better than simply
-looking for a property on an object. "Why?" you might ask. Well, here's an
-unorganized list of reasons why:
+"Why?" you might ask. Well, here's why:
 
-- When you want to do more beyond getting an object property, you don't have
-  to look up and change every accessor in your codebase.
+- When you want to do more beyond getting an object property, you don't have to look up and change every accessor in your codebase.
 - Makes adding validation simple when doing a `set`.
 - Encapsulates the internal representation.
 - Easy to add logging and error handling when getting and setting.
-- You can lazy load your object's properties, let's say getting it from a
-  server.
 
 **Bad:**
 
-```javascript
-function makeBankAccount() {
-  // ...
-
-  return {
-    balance: 0
-    // ...
-  };
+```csharp
+class BankAccount {
+	public int balance;
+	// ...
 }
 
-const account = makeBankAccount();
-account.balance = 100;
+var account = new BankAccount();
+account.balance = 100; // to log/validate/modify this action we need to find all the occurences in the entire code and modify it.
 ```
 
 **Good:**
 
-```javascript
-function makeBankAccount() {
-  // this one is private
-  let balance = 0;
-
-  // a "getter", made public via the returned object below
-  function getBalance() {
-    return balance;
-  }
-
-  // a "setter", made public via the returned object below
-  function setBalance(amount) {
-    // ... validate before updating the balance
-    balance = amount;
-  }
-
-  return {
-    // ...
-    getBalance,
-    setBalance
-  };
+```csharp
+class BankAccount {
+	private int balance;
+	// ...
+	public int Balance { get => this.balance; set => this.balance = value; } 
 }
 
-const account = makeBankAccount();
-account.setBalance(100);
+var account = new BankAccount();
+account.Balance = 100;
 ```
+To add validation as an example:
 
-**[⬆ back to top](#table-of-contents)**
-
-### Make objects have private members
-
-This can be accomplished through closures (for ES5 and below).
-
-**Bad:**
-
-```javascript
-const Employee = function(name) {
-  this.name = name;
-};
-
-Employee.prototype.getName = function getName() {
-  return this.name;
-};
-
-const employee = new Employee("John Doe");
-console.log(`Employee name: ${employee.getName()}`); // Employee name: John Doe
-delete employee.name;
-console.log(`Employee name: ${employee.getName()}`); // Employee name: undefined
-```
-
-**Good:**
-
-```javascript
-function makeEmployee(name) {
-  return {
-    getName() {
-      return name;
-    }
-  };
+```csharp
+class BankAccount {
+	private int balance;
+	// ...
+	public int Balance { 
+		get => this.balance; 
+		set {
+			if(value < 0) {
+				throw new Exception("Value can't be negative");
+			}
+			
+			this.balance = value;
+		} 
+	} 
 }
-
-const employee = makeEmployee("John Doe");
-console.log(`Employee name: ${employee.getName()}`); // Employee name: John Doe
-delete employee.name;
-console.log(`Employee name: ${employee.getName()}`); // Employee name: John Doe
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-## **Classes**
-
-### Prefer ES2015/ES6 classes over ES5 plain functions
-
-It's very difficult to get readable class inheritance, construction, and method
-definitions for classical ES5 classes. If you need inheritance (and be aware
-that you might not), then prefer ES2015/ES6 classes. However, prefer small functions over
-classes until you find yourself needing larger and more complex objects.
-
-**Bad:**
-
-```javascript
-const Animal = function(age) {
-  if (!(this instanceof Animal)) {
-    throw new Error("Instantiate Animal with `new`");
-  }
-
-  this.age = age;
-};
-
-Animal.prototype.move = function move() {};
-
-const Mammal = function(age, furColor) {
-  if (!(this instanceof Mammal)) {
-    throw new Error("Instantiate Mammal with `new`");
-  }
-
-  Animal.call(this, age);
-  this.furColor = furColor;
-};
-
-Mammal.prototype = Object.create(Animal.prototype);
-Mammal.prototype.constructor = Mammal;
-Mammal.prototype.liveBirth = function liveBirth() {};
-
-const Human = function(age, furColor, languageSpoken) {
-  if (!(this instanceof Human)) {
-    throw new Error("Instantiate Human with `new`");
-  }
-
-  Mammal.call(this, age, furColor);
-  this.languageSpoken = languageSpoken;
-};
-
-Human.prototype = Object.create(Mammal.prototype);
-Human.prototype.constructor = Human;
-Human.prototype.speak = function speak() {};
-```
-
-**Good:**
-
-```javascript
-class Animal {
-  constructor(age) {
-    this.age = age;
-  }
-
-  move() {
-    /* ... */
-  }
-}
-
-class Mammal extends Animal {
-  constructor(age, furColor) {
-    super(age);
-    this.furColor = furColor;
-  }
-
-  liveBirth() {
-    /* ... */
-  }
-}
-
-class Human extends Mammal {
-  constructor(age, furColor, languageSpoken) {
-    super(age, furColor);
-    this.languageSpoken = languageSpoken;
-  }
-
-  speak() {
-    /* ... */
-  }
-}
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Use method chaining
-
-This pattern is very useful in JavaScript and you see it in many libraries such
-as jQuery and Lodash. It allows your code to be expressive, and less verbose.
-For that reason, I say, use method chaining and take a look at how clean your code
-will be. In your class functions, simply return `this` at the end of every function,
-and you can chain further class methods onto it.
-
-**Bad:**
-
-```javascript
-class Car {
-  constructor(make, model, color) {
-    this.make = make;
-    this.model = model;
-    this.color = color;
-  }
-
-  setMake(make) {
-    this.make = make;
-  }
-
-  setModel(model) {
-    this.model = model;
-  }
-
-  setColor(color) {
-    this.color = color;
-  }
-
-  save() {
-    console.log(this.make, this.model, this.color);
-  }
-}
-
-const car = new Car("Ford", "F-150", "red");
-car.setColor("pink");
-car.save();
-```
-
-**Good:**
-
-```javascript
-class Car {
-  constructor(make, model, color) {
-    this.make = make;
-    this.model = model;
-    this.color = color;
-  }
-
-  setMake(make) {
-    this.make = make;
-    // NOTE: Returning this for chaining
-    return this;
-  }
-
-  setModel(model) {
-    this.model = model;
-    // NOTE: Returning this for chaining
-    return this;
-  }
-
-  setColor(color) {
-    this.color = color;
-    // NOTE: Returning this for chaining
-    return this;
-  }
-
-  save() {
-    console.log(this.make, this.model, this.color);
-    // NOTE: Returning this for chaining
-    return this;
-  }
-}
-
-const car = new Car("Ford", "F-150", "red").setColor("pink").save();
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
 ### Prefer composition over inheritance
 
-As stated famously in [_Design Patterns_](https://en.wikipedia.org/wiki/Design_Patterns) by the Gang of Four,
-you should prefer composition over inheritance where you can. There are lots of
-good reasons to use inheritance and lots of good reasons to use composition.
-The main point for this maxim is that if your mind instinctively goes for
-inheritance, try to think if composition could model your problem better. In some
-cases it can.
-
-You might be wondering then, "when should I use inheritance?" It
-depends on your problem at hand, but this is a decent list of when inheritance
-makes more sense than composition:
-
-1. Your inheritance represents an "is-a" relationship and not a "has-a"
-   relationship (Human->Animal vs. User->UserDetails).
-2. You can reuse code from the base classes (Humans can move like all animals).
-3. You want to make global changes to derived classes by changing a base class.
-   (Change the caloric expenditure of all animals when they move).
+Your inheritance should represents an "is-a" relationship and not a "has-a" relationship (Employee->User vs. User->UserDetails).
 
 **Bad:**
 
-```javascript
+```csharp
 class Employee {
-  constructor(name, email) {
+  // ...
+  
+  public Employee(string name, string email) {
     this.name = name;
     this.email = email;
   }
@@ -956,9 +726,8 @@ class Employee {
 }
 
 // Bad because Employees "have" tax data. EmployeeTaxData is not a type of Employee
-class EmployeeTaxData extends Employee {
-  constructor(ssn, salary) {
-    super();
+class EmployeeTaxData : Employee {
+  public EmployeeTaxData (string name, string email, string ssn, string salary) : base(name, email){
     this.ssn = ssn;
     this.salary = salary;
   }
@@ -969,9 +738,11 @@ class EmployeeTaxData extends Employee {
 
 **Good:**
 
-```javascript
+```csharp
 class EmployeeTaxData {
-  constructor(ssn, salary) {
+  // ...
+  
+  public EmployeeTaxData(string ssn, string salary) {
     this.ssn = ssn;
     this.salary = salary;
   }
@@ -980,14 +751,14 @@ class EmployeeTaxData {
 }
 
 class Employee {
-  constructor(name, email) {
+  // ...
+  
+  public Employee (string  name, string  email, EmployeeTaxData  taxData ) {
     this.name = name;
     this.email = email;
+    this.taxData = taxData ;
   }
 
-  setTaxData(ssn, salary) {
-    this.taxData = new EmployeeTaxData(ssn, salary);
-  }
   // ...
 }
 ```
@@ -998,30 +769,30 @@ class Employee {
 
 ### Single Responsibility Principle (SRP)
 
-As stated in Clean Code, "There should never be more than one reason for a class
-to change". It's tempting to jam-pack a class with a lot of functionality, like
-when you can only take one suitcase on your flight. The issue with this is
-that your class won't be conceptually cohesive and it will give it many reasons
-to change. Minimizing the amount of times you need to change a class is important.
-It's important because if too much functionality is in one class and you modify
-a piece of it, it can be difficult to understand how that will affect other
-dependent modules in your codebase.
+- "There should never be more than one reason for a class to change".
+- It's tempting to jam-pack a class with a lot of functionality, like when you can only take one suitcase on your flight.
+- The issue with this is that your class won't be conceptually cohesive and it will give it many reasons to change.
+- Minimizing the amount of times you need to change a class is important.
+- It's important because if too much functionality is in one class and you modify a piece of it, it can be difficult to understand how that will affect other dependent modules in your codebase.
+- A good indicator for violating this principle is the number of the constructor arguments or the number of public functions that the class have.
 
 **Bad:**
 
-```javascript
+```csharp
 class UserSettings {
-  constructor(user) {
+  // ...
+  
+  public UserSettings(User user) {
     this.user = user;
   }
 
-  changeSettings(settings) {
-    if (this.verifyCredentials()) {
+  public void ChangeSettings(Settings settings) {
+    if (this.VerifyCredentials()) {
       // ...
     }
   }
 
-  verifyCredentials() {
+  bool VerifyCredentials() {
     // ...
   }
 }
@@ -1029,24 +800,24 @@ class UserSettings {
 
 **Good:**
 
-```javascript
+```csharp
 class UserAuth {
-  constructor(user) {
+  public UserAuth(user) {
     this.user = user;
   }
 
-  verifyCredentials() {
+  public bool VerifyCredentials() {
     // ...
   }
 }
 
 class UserSettings {
-  constructor(user) {
+  public UserSettings(user, UserAuth auth) {
     this.user = user;
-    this.auth = new UserAuth(user);
+    this.auth = auth;
   }
 
-  changeSettings(settings) {
+  public void ChangeSettings(Settings settings) {
     if (this.auth.verifyCredentials()) {
       // ...
     }
@@ -1054,93 +825,76 @@ class UserSettings {
 }
 ```
 
+**!!Warning!!**
+- Don't go overboard while applying this principle.
+- Different actions on the same entity should considered a single responsibility most of the time.
+- CRUD operations on the same entity belong to the same class usually.
+
 **[⬆ back to top](#table-of-contents)**
 
 ### Open/Closed Principle (OCP)
 
-As stated by Bertrand Meyer, "software entities (classes, modules, functions,
-etc.) should be open for extension, but closed for modification." What does that
-mean though? This principle basically states that you should allow users to
-add new functionalities without changing existing code.
+- "Software entities (classes, modules, functions, etc.) should be open for extension, but closed for modification." - This principle basically states that you should allow users to add new functionalities without changing existing code.
+- A good indicator of violating this principle is when you have a `switch` case or a equivalent `if else` chain.
 
 **Bad:**
 
-```javascript
-class AjaxAdapter extends Adapter {
-  constructor() {
-    super();
-    this.name = "ajaxAdapter";
-  }
-}
-
-class NodeAdapter extends Adapter {
-  constructor() {
-    super();
-    this.name = "nodeAdapter";
-  }
-}
-
+```csharp
 class HttpRequester {
-  constructor(adapter) {
-    this.adapter = adapter;
+  // ...
+  
+  constructor(string adapterType) {
+    this.adapterType= adapterType;
   }
 
-  fetch(url) {
-    if (this.adapter.name === "ajaxAdapter") {
-      return makeAjaxCall(url).then(response => {
-        // transform response and return
-      });
-    } else if (this.adapter.name === "nodeAdapter") {
-      return makeHttpCall(url).then(response => {
-        // transform response and return
-      });
+  public string Fetch(string url) {
+    if (this.adapterType == "ajaxAdapter") {
+      return Process(MakeAjaxCall(url));
+    } else if (this.adapterType == "nodeAdapter") {
+      return Process(MakeHttpCall(url));
     }
   }
 }
 
-function makeAjaxCall(url) {
-  // request and return promise
-}
-
-function makeHttpCall(url) {
-  // request and return promise
-}
+/// ...
 ```
 
 **Good:**
 
-```javascript
-class AjaxAdapter extends Adapter {
-  constructor() {
-    super();
+```csharp
+class AjaxAdapter : Adapter {
+  // ...
+  
+  public AjaxAdapter() {
     this.name = "ajaxAdapter";
   }
 
-  request(url) {
+  public string Request(url) {
     // request and return promise
   }
 }
 
-class NodeAdapter extends Adapter {
-  constructor() {
-    super();
+class NodeAdapter : Adapter {
+  // ...
+  
+  public NodeAdapter () {
     this.name = "nodeAdapter";
   }
 
-  request(url) {
+  public string Request(url) {
     // request and return promise
   }
 }
 
 class HttpRequester {
-  constructor(adapter) {
+  // ...
+  
+  public HttpRequester(Adapter adapter) {
     this.adapter = adapter;
   }
 
-  fetch(url) {
-    return this.adapter.request(url).then(response => {
-      // transform response and return
-    });
+  public string Fetch(string url) {
+    return Process(this.adapter.Request(url));
   }
 }
 ```
@@ -1149,197 +903,169 @@ class HttpRequester {
 
 ### Liskov Substitution Principle (LSP)
 
-This is a scary term for a very simple concept. It's formally defined as "If S
-is a subtype of T, then objects of type T may be replaced with objects of type S
-(i.e., objects of type S may substitute objects of type T) without altering any
-of the desirable properties of that program (correctness, task performed,
-etc.)." That's an even scarier definition.
-
-The best explanation for this is if you have a parent class and a child class,
-then the base class and child class can be used interchangeably without getting
-incorrect results. This might still be confusing, so let's take a look at the
-classic Square-Rectangle example. Mathematically, a square is a rectangle, but
-if you model it using the "is-a" relationship via inheritance, you quickly
-get into trouble.
+- "If S is a subtype of T, then objects of type T may be replaced with objects of type S without altering any
+of the desirable properties of that program"
+- If you have a parent class and a child class, then the base class and child class can be used interchangeably without getting incorrect results.
 
 **Bad:**
 
-```javascript
+The classic rectangle and square example.
+Mathematically, a square is a rectangle, so you might do this: 
+```csharp
 class Rectangle {
-  constructor() {
+  public Rectangle() {
     this.width = 0;
     this.height = 0;
   }
 
-  setColor(color) {
+  public void SetColor(Color color) {
     // ...
   }
 
-  render(area) {
+  public void Render(float area) {
     // ...
   }
 
-  setWidth(width) {
+  public void SetWidth(float width) {
     this.width = width;
   }
 
-  setHeight(height) {
+  public void SetHeight(float height) {
     this.height = height;
   }
 
-  getArea() {
+  public float GetArea() {
     return this.width * this.height;
   }
 }
 
-class Square extends Rectangle {
-  setWidth(width) {
+class Square : Rectangle {
+  public void SetWidth(float width) {
     this.width = width;
     this.height = width;
   }
 
-  setHeight(height) {
+  public void SetHeight(float height) {
     this.width = height;
     this.height = height;
   }
 }
 
-function renderLargeRectangles(rectangles) {
-  rectangles.forEach(rectangle => {
-    rectangle.setWidth(4);
-    rectangle.setHeight(5);
-    const area = rectangle.getArea(); // BAD: Returns 25 for Square. Should be 20.
-    rectangle.render(area);
+void RenderLargeRectangles(List<Rectangle> rectangles) {
+  rectangles.ForEach(rectangle => {
+	// flipping the width and height will change the outcome
+	// using the rectangle class will require careful handling or it will produce undesirable results.
+	// to avoid this, you might attempt to add a type check, but that is fixing the symptoms not the cause.
+    rectangle.SetWidth(4); 
+    rectangle.SetHeight(5);
+    var area = rectangle.GetArea();
+    rectangle.Render(area);
   });
 }
 
-const rectangles = [new Rectangle(), new Rectangle(), new Square()];
-renderLargeRectangles(rectangles);
+var rectangles = new List<Rectangle> { new Rectangle(), new Rectangle(), new Square() };
+RenderLargeRectangles(rectangles);
 ```
 
 **Good:**
 
-```javascript
+As opposed to Mathematics, in the OOP world, a square is not a rectangle, because it require a different set of properties to describe it.
+```csharp
 class Shape {
-  setColor(color) {
+  public abstract void SetColor(Color color) {
     // ...
   }
 
-  render(area) {
+  public void Render(float area) {
     // ...
   }
 }
 
-class Rectangle extends Shape {
-  constructor(width, height) {
-    super();
+class Rectangle : Shape {
+  public Rectangle (float width, float height) {
     this.width = width;
     this.height = height;
   }
 
-  getArea() {
+  public override float GetArea() {
     return this.width * this.height;
   }
 }
 
-class Square extends Shape {
-  constructor(length) {
-    super();
+class Square : Shape {
+  public Square(length) {
     this.length = length;
   }
 
-  getArea() {
+  public override float GetArea() {
     return this.length * this.length;
   }
 }
 
-function renderLargeShapes(shapes) {
-  shapes.forEach(shape => {
-    const area = shape.getArea();
-    shape.render(area);
+public void RenderLargeShapes(List<Shape> shapes) {
+  shapes.ForEach(shape => {
+    var area = shape.GetArea();
+    shape.Render(area);
   });
 }
 
-const shapes = [new Rectangle(4, 5), new Rectangle(4, 5), new Square(5)];
-renderLargeShapes(shapes);
+var shapes = new List<Shape> { new Rectangle(4, 5), new Rectangle(4, 5), new Square(5) };
+RenderLargeShapes(shapes);
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
 ### Interface Segregation Principle (ISP)
 
-JavaScript doesn't have interfaces so this principle doesn't apply as strictly
-as others. However, it's important and relevant even with JavaScript's lack of
-type system.
-
-ISP states that "Clients should not be forced to depend upon interfaces that
-they do not use." Interfaces are implicit contracts in JavaScript because of
-duck typing.
-
-A good example to look at that demonstrates this principle in JavaScript is for
-classes that require large settings objects. Not requiring clients to setup
-huge amounts of options is beneficial, because most of the time they won't need
-all of the settings. Making them optional helps prevent having a
-"fat interface".
+- "Clients should not be forced to depend upon interfaces that they do not use."
+- 
 
 **Bad:**
 
-```javascript
-class DOMTraverser {
-  constructor(settings) {
-    this.settings = settings;
-    this.setup();
-  }
-
-  setup() {
-    this.rootNode = this.settings.rootNode;
-    this.settings.animationModule.setup();
-  }
-
-  traverse() {
-    // ...
-  }
+```csharp
+interface IOrderService {
+    void OrderBurger(int quantity);
+    void OrderFries(int fries);
+    void OrderCombo(int quantity, int fries);
 }
 
-const $ = new DOMTraverser({
-  rootNode: document.getElementsByTagName("body"),
-  animationModule() {} // Most of the time, we won't need to animate when traversing.
-  // ...
-});
+public class BurgerOrderService : IOrderService
+{
+    public void OrderBurger(int quantity)
+    {
+        Console.WriteLine("Received order of " + quantity.ToString() + " burgers");
+    }
+    public void OrderFries(int fries)
+    {
+        throw new Exception("No fries in burger only order");
+    }
+    public void OrderCombo(int quantity, int fries)
+    {
+        throw new Exception("No combo in burger only order");
+    }
+}
 ```
 
 **Good:**
 
-```javascript
-class DOMTraverser {
-  constructor(settings) {
-    this.settings = settings;
-    this.options = settings.options;
-    this.setup();
-  }
-
-  setup() {
-    this.rootNode = this.settings.rootNode;
-    this.setupOptions();
-  }
-
-  setupOptions() {
-    if (this.options.animationModule) {
-      // ...
-    }
-  }
-
-  traverse() {
-    // ...
-  }
+```csharp
+interface IOrderBurgerService {
+    void OrderBurger(int quantity);
+}
+interface FriesOrderService {
+    void OrderFries(int fries);
+}
+interface ComboOrderService {
+    void OrderCombo(int fries);
 }
 
-const $ = new DOMTraverser({
-  rootNode: document.getElementsByTagName("body"),
-  options: {
-    animationModule() {}
-  }
-});
+public class BurgerOrderService : IOrderBurgerService
+{
+    public void OrderBurger(int quantity)
+    {
+        Console.WriteLine("Received order of " + quantity.ToString() + " burgers");
+    }
+}
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -1347,491 +1073,264 @@ const $ = new DOMTraverser({
 ### Dependency Inversion Principle (DIP)
 
 This principle states two essential things:
-
 1. High-level modules should not depend on low-level modules. Both should
    depend on abstractions.
 2. Abstractions should not depend upon details. Details should depend on
    abstractions.
 
-This can be hard to understand at first, but if you've worked with AngularJS,
-you've seen an implementation of this principle in the form of Dependency
-Injection (DI). While they are not identical concepts, DIP keeps high-level
-modules from knowing the details of its low-level modules and setting them up.
-It can accomplish this through DI. A huge benefit of this is that it reduces
-the coupling between modules. Coupling is a very bad development pattern because
-it makes your code hard to refactor.
+In friendlier terms:
 
-As stated previously, JavaScript doesn't have interfaces so the abstractions
-that are depended upon are implicit contracts. That is to say, the methods
-and properties that an object/class exposes to another object/class. In the
-example below, the implicit contract is that any Request module for an
-`InventoryTracker` will have a `requestItems` method.
+ 1. A class should not create it's own dependencies, they can create DTOs and simple Models though.
+ 2. It's better to depend upon interfaces and abstract classes then upon classes.
+ 3. A dependency injection framework or the Factory pattern should be used to inject dependencies.
 
 **Bad:**
 
-```javascript
-class InventoryRequester {
-  constructor() {
-    this.REQ_METHODS = ["HTTP"];
-  }
-
-  requestItem(item) {
-    // ...
-  }
+```csharp
+public class Client { 
+	private SquareLogic square; 
+	
+	public Client() { 
+		this.square = new SqaureLogic(); 
+	} 
+	
+	//...
 }
-
-class InventoryTracker {
-  constructor(items) {
-    this.items = items;
-
-    // BAD: We have created a dependency on a specific request implementation.
-    // We should just have requestItems depend on a request method: `request`
-    this.requester = new InventoryRequester();
-  }
-
-  requestItems() {
-    this.items.forEach(item => {
-      this.requester.requestItem(item);
-    });
-  }
-}
-
-const inventoryTracker = new InventoryTracker(["apples", "bananas"]);
-inventoryTracker.requestItems();
 ```
 
 **Good:**
 
-```javascript
-class InventoryTracker {
-  constructor(items, requester) {
-    this.items = items;
-    this.requester = requester;
-  }
-
-  requestItems() {
-    this.items.forEach(item => {
-      this.requester.requestItem(item);
-    });
-  }
+```csharp
+public class Client { 
+	private ISquare square; 
+	
+	public Client(ISquare square) { 
+		this.square = square; 
+	} 
+	
+	//...
 }
-
-class InventoryRequesterV1 {
-  constructor() {
-    this.REQ_METHODS = ["HTTP"];
-  }
-
-  requestItem(item) {
-    // ...
-  }
-}
-
-class InventoryRequesterV2 {
-  constructor() {
-    this.REQ_METHODS = ["WS"];
-  }
-
-  requestItem(item) {
-    // ...
-  }
-}
-
-// By constructing our dependencies externally and injecting them, we can easily
-// substitute our request module for a fancy new one that uses WebSockets.
-const inventoryTracker = new InventoryTracker(
-  ["apples", "bananas"],
-  new InventoryRequesterV2()
-);
-inventoryTracker.requestItems();
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
 ## **Testing**
 
-Testing is more important than shipping. If you have no tests or an
-inadequate amount, then every time you ship code you won't be sure that you
-didn't break anything. Deciding on what constitutes an adequate amount is up
-to your team, but having 100% coverage (all statements and branches) is how
-you achieve very high confidence and developer peace of mind. This means that
-in addition to having a great testing framework, you also need to use a
-[good coverage tool](https://gotwarlost.github.io/istanbul/).
+- Testing is more important than shipping.
+- If you don't have good tests, then every time you ship code you won't be sure that you didn't break anything that was working before.
+- Deciding on what constitutes an adequate amount is up to the project.
+- There's no excuse to not write tests. You might be faster at the beginning, but after a few days worth of work you will start having regression problems which will slow you down the further you go without tests.
 
-There's no excuse to not write tests. There are [plenty of good JS test frameworks](https://jstherightway.org/#testing-tools), so find one that your team prefers.
-When you find one that works for your team, then aim to always write tests
-for every new feature/module you introduce. If your preferred method is
-Test Driven Development (TDD), that is great, but the main point is to just
-make sure you are reaching your coverage goals before launching any feature,
-or refactoring an existing one.
+### Test Pyramid
 
-### Single concept per test
+![Ideal Automated Testing Pyramid](http://64.227.102.243/wp-content/uploads/2015/10/idealautomatedtestingpyramid.png)
 
-**Bad:**
+1.  Unit Tests
+2.  Integration/API/UI Component Tests
+3.  User Interface Tests
+4. Manual Testing
 
-```javascript
-import assert from "assert";
-
-describe("MomentJS", () => {
-  it("handles date boundaries", () => {
-    let date;
-
-    date = new MomentJS("1/1/2015");
-    date.addDays(30);
-    assert.equal("1/31/2015", date);
-
-    date = new MomentJS("2/1/2016");
-    date.addDays(28);
-    assert.equal("02/29/2016", date);
-
-    date = new MomentJS("2/1/2015");
-    date.addDays(28);
-    assert.equal("03/01/2015", date);
-  });
-});
-```
-
-**Good:**
-
-```javascript
-import assert from "assert";
-
-describe("MomentJS", () => {
-  it("handles 30-day months", () => {
-    const date = new MomentJS("1/1/2015");
-    date.addDays(30);
-    assert.equal("1/31/2015", date);
-  });
-
-  it("handles leap year", () => {
-    const date = new MomentJS("2/1/2016");
-    date.addDays(28);
-    assert.equal("02/29/2016", date);
-  });
-
-  it("handles non-leap year", () => {
-    const date = new MomentJS("2/1/2015");
-    date.addDays(28);
-    assert.equal("03/01/2015", date);
-  });
-});
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-## **Concurrency**
-
-### Use Promises, not callbacks
-
-Callbacks aren't clean, and they cause excessive amounts of nesting. With ES2015/ES6,
-Promises are a built-in global type. Use them!
-
-**Bad:**
-
-```javascript
-import { get } from "request";
-import { writeFile } from "fs";
-
-get(
-  "https://en.wikipedia.org/wiki/Robert_Cecil_Martin",
-  (requestErr, response, body) => {
-    if (requestErr) {
-      console.error(requestErr);
-    } else {
-      writeFile("article.html", body, writeErr => {
-        if (writeErr) {
-          console.error(writeErr);
-        } else {
-          console.log("File written");
-        }
-      });
-    }
-  }
-);
-```
-
-**Good:**
-
-```javascript
-import { get } from "request-promise";
-import { writeFile } from "fs-extra";
-
-get("https://en.wikipedia.org/wiki/Robert_Cecil_Martin")
-  .then(body => {
-    return writeFile("article.html", body);
-  })
-  .then(() => {
-    console.log("File written");
-  })
-  .catch(err => {
-    console.error(err);
-  });
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Async/Await are even cleaner than Promises
-
-Promises are a very clean alternative to callbacks, but ES2017/ES8 brings async and await
-which offer an even cleaner solution. All you need is a function that is prefixed
-in an `async` keyword, and then you can write your logic imperatively without
-a `then` chain of functions. Use this if you can take advantage of ES2017/ES8 features
-today!
-
-**Bad:**
-
-```javascript
-import { get } from "request-promise";
-import { writeFile } from "fs-extra";
-
-get("https://en.wikipedia.org/wiki/Robert_Cecil_Martin")
-  .then(body => {
-    return writeFile("article.html", body);
-  })
-  .then(() => {
-    console.log("File written");
-  })
-  .catch(err => {
-    console.error(err);
-  });
-```
-
-**Good:**
-
-```javascript
-import { get } from "request-promise";
-import { writeFile } from "fs-extra";
-
-async function getCleanCodeArticle() {
-  try {
-    const body = await get(
-      "https://en.wikipedia.org/wiki/Robert_Cecil_Martin"
-    );
-    await writeFile("article.html", body);
-    console.log("File written");
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-getCleanCodeArticle()
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-## **Error Handling**
-
-Thrown errors are a good thing! They mean the runtime has successfully
-identified when something in your program has gone wrong and it's letting
-you know by stopping function execution on the current stack, killing the
-process (in Node), and notifying you in the console with a stack trace.
-
-### Don't ignore caught errors
-
-Doing nothing with a caught error doesn't give you the ability to ever fix
-or react to said error. Logging the error to the console (`console.log`)
-isn't much better as often times it can get lost in a sea of things printed
-to the console. If you wrap any bit of code in a `try/catch` it means you
-think an error may occur there and therefore you should have a plan,
-or create a code path, for when it occurs.
-
-**Bad:**
-
-```javascript
-try {
-  functionThatMightThrow();
-} catch (error) {
-  console.log(error);
-}
-```
-
-**Good:**
-
-```javascript
-try {
-  functionThatMightThrow();
-} catch (error) {
-  // One option (more noisy than console.log):
-  console.error(error);
-  // Another option:
-  notifyUserOfError(error);
-  // Another option:
-  reportErrorToService(error);
-  // OR do all three!
-}
-```
-
-### Don't ignore rejected promises
-
-For the same reason you shouldn't ignore caught errors
-from `try/catch`.
-
-**Bad:**
-
-```javascript
-getdata()
-  .then(data => {
-    functionThatMightThrow(data);
-  })
-  .catch(error => {
-    console.log(error);
-  });
-```
-
-**Good:**
-
-```javascript
-getdata()
-  .then(data => {
-    functionThatMightThrow(data);
-  })
-  .catch(error => {
-    // One option (more noisy than console.log):
-    console.error(error);
-    // Another option:
-    notifyUserOfError(error);
-    // Another option:
-    reportErrorToService(error);
-    // OR do all three!
-  });
-```
+The more high-level you get the more permutation you will have to do.
+That's why the more high-level you get the fewer tests you should have.
+And the more low-level you get the more permutation you need to test.
 
 **[⬆ back to top](#table-of-contents)**
 
 ## **Formatting**
 
-Formatting is subjective. Like many rules herein, there is no hard and fast
-rule that you must follow. The main point is DO NOT ARGUE over formatting.
-There are [tons of tools](https://standardjs.com/rules.html) to automate this.
-Use one! It's a waste of time and money for engineers to argue over formatting.
+- Formatting is subjective. Like many rules herein, there is no hard and fast
+rule that you must follow.
+- The main point is to have a consistent style between all the developers.
+- There are tons of tools to automate this.
 
-For things that don't fall under the purview of automatic formatting
-(indentation, tabs vs. spaces, double vs. single quotes, etc.) look here
-for some guidance.
+### Function size
+
+You should not have to scroll horizontally or vertically to read the function.
+
+**Bad:**
+```csharp
+public async Task RecomputeCPTs(IStainsBillingDataAccess stainsBillingDataAccess, bool fromLoad)
+{
+	try
+	{
+		logger.Trace("Start.");
+		if ((isAutoBillStainsForBilledCases || !caseBilledChecker.IsCaseBilled()) && isAutoBillStains && !flagValueGetter.GetFlagValue("Disable Auto Billing"))
+		{
+			//remove all cpts related to stains that are not billed
+			Dictionary<string, int> billedCpts = new Dictionary<string, int>();
+			var stainsBillingModels = getStainsBillingModels();
+			foreach (var billing in stainsBillingModels.SelectMany(s => s.Billings))
+			{
+				if (!string.IsNullOrWhiteSpace(billing.CPTCode) &&
+					await stainsBillingDataAccess.IsCPTRelatedToStain(CPTViewModel.GetCPTOnly(billing.CPTCode), isChangeCPTForRepeatedValues))
+				{
+					if (!billing.Billed && !(billing.CPTCodeCredits ?? false))
+					{
+						billing.CPTCode = "";
+						billing.Origin = null;
+					}
+					else if (!(billing.CPTCodeCredits ?? false))
+					{
+						var Code = CPTViewModel.GetCPTOnly(billing.CPTCode);
+						var Multiplier = CPTViewModel.GetMultiplier(billing.CPTCode);
+						if (billedCpts.ContainsKey(Code)) billedCpts[Code] = billedCpts[Code] + Multiplier;
+						else billedCpts.Add(Code, Multiplier);
+					}
+				}
+			}
+			//re-add all related cpts
+			List<string> lstHEStains = new List<string>();
+			foreach (var subCase in stainsBillingModels)
+			{
+				bool heStainsExists = false;
+				foreach (var specialProcedure in subCase.SpecialProcedures)
+				{
+					if (!string.IsNullOrWhiteSpace(specialProcedure.LabelDescription))
+					{
+						if (isHEBillOnceOption)
+						{
+							if (IsHEStain(specialProcedure.LabelDescription))
+							{
+								if (heStainsExists) continue;
+								else
+								{
+									heStainsExists = true;
+								}
+							}
+						}
+						await AddStainCPT(specialProcedure.LabelDescription, subCase, fromLoad, billedCpts, stainsBillingDataAccess);
+					}
+				}
+			}
+		}
+		logger.Trace("Success End.");
+	}
+	catch (Exception exception)
+	{
+		logger.Error(exception);
+		logger.Trace("End, Failed Unkown Error: " + exception.Message);
+	}
+}
+```
 
 ### Use consistent capitalization
 
-JavaScript is untyped, so capitalization tells you a lot about your variables,
-functions, etc. These rules are subjective, so your team can choose whatever
-they want. The point is, no matter what you all choose, just be consistent.
+- private fields should have camelCase
+- everything else should have PascalCase
 
 **Bad:**
 
-```javascript
-const DAYS_IN_WEEK = 7;
-const daysInMonth = 30;
+```csharp
+private int DAYS_IN_WEEK = 7;
+private int DaysInMonth = 30;
 
-const songs = ["Back In Black", "Stairway to Heaven", "Hey Jude"];
-const Artists = ["ACDC", "Led Zeppelin", "The Beatles"];
+public string name { get; set; }
 
-function eraseDatabase() {}
-function restore_database() {}
+void eraseDatabase() {}
+void Restore_database() {}
 
 class animal {}
-class Alpaca {}
+class Alpacawool {}
 ```
 
 **Good:**
 
-```javascript
-const DAYS_IN_WEEK = 7;
-const DAYS_IN_MONTH = 30;
+```csharp
+private int daysInWeek = 7;
+private int daysInMonth = 30;
 
-const SONGS = ["Back In Black", "Stairway to Heaven", "Hey Jude"];
-const ARTISTS = ["ACDC", "Led Zeppelin", "The Beatles"];
+public string Name { get; set; }
 
-function eraseDatabase() {}
-function restoreDatabase() {}
+void EraseDatabase() {}
+void RestoreDatabase() {}
 
 class Animal {}
-class Alpaca {}
+class AlpacaWool {}
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
 ### Function callers and callees should be close
 
-If a function calls another, keep those functions vertically close in the source
-file. Ideally, keep the caller right above the callee. We tend to read code from
-top-to-bottom, like a newspaper. Because of this, make your code read that way.
+- If a function calls another, keep those functions vertically close in the source file. 
+- Ideally, keep the caller right above the callee. We tend to read code from top-to-bottom, like a newspaper.
 
 **Bad:**
 
-```javascript
+```csharp
 class PerformanceReview {
-  constructor(employee) {
+  public PerformanceReview(Employee employee) {
     this.employee = employee;
   }
 
-  lookupPeers() {
-    return db.lookup(this.employee, "peers");
+  private Employee LookupPeers() {
+    return db.Lookup(this.employee, "peers");
   }
 
-  lookupManager() {
-    return db.lookup(this.employee, "manager");
+  private Employee LookupManager() {
+    return db.Lookup(this.employee, "manager");
   }
 
-  getPeerReviews() {
-    const peers = this.lookupPeers();
+  private Review[] GetPeerReviews() {
+    var peers = this.LookupPeers();
     // ...
   }
 
-  perfReview() {
-    this.getPeerReviews();
-    this.getManagerReview();
-    this.getSelfReview();
+  public Review[] PerfReview() {
+	return this.GetPeerReviews()
+	  .Union(this.GetManagerReview())
+	  .Union(this.GetSelfReview())
+	  .ToArray();
+  }
+  
+  private Review GetManagerReview() {
+    var manager = this.LookupManager();
+    // ...
   }
 
-  getManagerReview() {
-    const manager = this.lookupManager();
-  }
-
-  getSelfReview() {
+  private Review GetSelfReview() {
     // ...
   }
 }
-
-const review = new PerformanceReview(employee);
-review.perfReview();
 ```
 
 **Good:**
 
-```javascript
+```csharp
 class PerformanceReview {
-  constructor(employee) {
+  public PerformanceReview(Employee employee) {
     this.employee = employee;
   }
 
-  perfReview() {
-    this.getPeerReviews();
-    this.getManagerReview();
-    this.getSelfReview();
+  public Review[] GetPerfReview() {
+	return this.GetPeerReviews()
+	  .Union(this.GetManagerReview())
+	  .Union(this.GetSelfReview())
+	  .ToArray();
   }
 
-  getPeerReviews() {
-    const peers = this.lookupPeers();
+  private Review[] GetPeerReviews() {
+    var peers = this.LookupPeers();
     // ...
   }
 
-  lookupPeers() {
-    return db.lookup(this.employee, "peers");
+  private Employee LookupPeers() {
+    return db.Lookup(this.employee, "peers");
   }
 
-  getManagerReview() {
-    const manager = this.lookupManager();
+  private Review GetManagerReview() {
+    var manager = this.LookupManager();
+    // ...
   }
 
-  lookupManager() {
-    return db.lookup(this.employee, "manager");
+  private Employee LookupManager() {
+    return db.Lookup(this.employee, "manager");
   }
 
-  getSelfReview() {
+  private Review GetSelfReview() {
     // ...
   }
 }
-
-const review = new PerformanceReview(employee);
-review.perfReview();
 ```
 
 **[⬆ back to top](#table-of-contents)**
@@ -1840,133 +1339,46 @@ review.perfReview();
 
 ### Only comment things that have business logic complexity.
 
-Comments are an apology, not a requirement. Good code _mostly_ documents itself.
+- Comments are an apology, not a requirement. 
+- Good code _mostly_ documents itself.
+- Don’t Use a Comment When You Can Use a Function or a Variable.
+- Don't document non public code.
 
 **Bad:**
 
-```javascript
-function hashIt(data) {
-  // The hash
-  let hash = 0;
-
-  // Length of string
-  const length = data.length;
-
-  // Loop through every character in data
-  for (let i = 0; i < length; i++) {
-    // Get character code.
-    const char = data.charCodeAt(i);
-    // Make the hash
-    hash = (hash << 5) - hash + char;
-    // Convert to 32-bit integer
-    hash &= hash;
-  }
-}
+```csharp
+// Check to see if the employee is eligible for full benefits
+if ((employee.flags & HOURLY_FLAG) && (employee.age > 65))
 ```
 
 **Good:**
 
-```javascript
-function hashIt(data) {
-  let hash = 0;
-  const length = data.length;
-
-  for (let i = 0; i < length; i++) {
-    const char = data.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-
-    // Convert to 32-bit integer
-    hash &= hash;
-  }
-}
+```csharp
+if (employee.isEligibleForFullBenefits())
 ```
 
 **[⬆ back to top](#table-of-contents)**
 
 ### Don't leave commented out code in your codebase
 
-Version control exists for a reason. Leave old code in your history.
-
-**Bad:**
-
-```javascript
-doStuff();
-// doOtherStuff();
-// doSomeMoreStuff();
-// doSoMuchStuff();
-```
-
-**Good:**
-
-```javascript
-doStuff();
-```
-
-**[⬆ back to top](#table-of-contents)**
+GIT exists for a reason. Leave old code in the history.
 
 ### Don't have journal comments
 
-Remember, use version control! There's no need for dead code, commented code,
-and especially journal comments. Use `git log` to get history!
+Remember, use GIT!
 
 **Bad:**
 
-```javascript
+```csharp
 /**
  * 2016-12-20: Removed monads, didn't understand them (RM)
  * 2016-10-01: Improved using special monads (JP)
  * 2016-02-03: Removed type-checking (LI)
  * 2015-03-14: Added combine with type-checking (JR)
  */
-function combine(a, b) {
+string Combine(string a, string b) {
   return a + b;
 }
 ```
 
-**Good:**
-
-```javascript
-function combine(a, b) {
-  return a + b;
-}
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Avoid positional markers
-
-They usually just add noise. Let the functions and variable names along with the
-proper indentation and formatting give the visual structure to your code.
-
-**Bad:**
-
-```javascript
-////////////////////////////////////////////////////////////////////////////////
-// Scope Model Instantiation
-////////////////////////////////////////////////////////////////////////////////
-$scope.model = {
-  menu: "foo",
-  nav: "bar"
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// Action setup
-////////////////////////////////////////////////////////////////////////////////
-const actions = function() {
-  // ...
-};
-```
-
-**Good:**
-
-```javascript
-$scope.model = {
-  menu: "foo",
-  nav: "bar"
-};
-
-const actions = function() {
-  // ...
-};
-```
 **[⬆ back to top](#table-of-contents)**
