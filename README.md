@@ -4,14 +4,14 @@
 ## Table of Contents
 
 1. [Introduction](#introduction)
-2. [Variables](#variables)
-3. [Functions](#functions)
-4. [Classes](#classes)
-5. [SOLID](#solid)
-6. [Testing](#testing)
-7. [Error Handling](#error-handling)
-8. [Formatting](#formatting)
-9. [Comments](#comments)
+2. [Formatting](#formatting)
+3. [Comments](#comments)
+4. [Variables](#variables)
+5. [Functions](#functions)
+6. [Classes](#classes)
+7. [SOLID](#solid)
+8. [Testing](#testing)
+9. [Error Handling](#error-handling)
 
 ## Introduction
 
@@ -34,9 +34,298 @@ If you say “I will back to fix it later”, “Later” usually means “never
 -   The code will be unmaintainable: understanding the code will be very difficult.
 -   The code will not be reusable: you won't be able to save time be re-using code.
 
+
+## **Formatting**
+
+- Formatting is subjective. Like many rules herein, there is no hard and fast
+rule that you must follow.
+- The main point is to have a consistent style between all the developers.
+- There are tons of tools to automate this.
+
+### Function size
+
+You should not have to scroll horizontally or vertically to read the function.
+
+**Bad:**
+```csharp
+public async Task RecomputeCPTs(IStainsBillingDataAccess stainsBillingDataAccess, bool fromLoad)
+{
+	try
+	{
+		logger.Trace("Start.");
+		if ((isAutoBillStainsForBilledCases || !caseBilledChecker.IsCaseBilled()) && isAutoBillStains && !flagValueGetter.GetFlagValue("Disable Auto Billing"))
+		{
+			//remove all cpts related to stains that are not billed
+			Dictionary<string, int> billedCpts = new Dictionary<string, int>();
+			var stainsBillingModels = getStainsBillingModels();
+			foreach (var billing in stainsBillingModels.SelectMany(s => s.Billings))
+			{
+				if (!string.IsNullOrWhiteSpace(billing.CPTCode) &&
+					await stainsBillingDataAccess.IsCPTRelatedToStain(CPTViewModel.GetCPTOnly(billing.CPTCode), isChangeCPTForRepeatedValues))
+				{
+					if (!billing.Billed && !(billing.CPTCodeCredits ?? false))
+					{
+						billing.CPTCode = "";
+						billing.Origin = null;
+					}
+					else if (!(billing.CPTCodeCredits ?? false))
+					{
+						var Code = CPTViewModel.GetCPTOnly(billing.CPTCode);
+						var Multiplier = CPTViewModel.GetMultiplier(billing.CPTCode);
+						if (billedCpts.ContainsKey(Code)) billedCpts[Code] = billedCpts[Code] + Multiplier;
+						else billedCpts.Add(Code, Multiplier);
+					}
+				}
+			}
+			//re-add all related cpts
+			List<string> lstHEStains = new List<string>();
+			foreach (var subCase in stainsBillingModels)
+			{
+				bool heStainsExists = false;
+				foreach (var specialProcedure in subCase.SpecialProcedures)
+				{
+					if (!string.IsNullOrWhiteSpace(specialProcedure.LabelDescription))
+					{
+						if (isHEBillOnceOption)
+						{
+							if (IsHEStain(specialProcedure.LabelDescription))
+							{
+								if (heStainsExists) continue;
+								else
+								{
+									heStainsExists = true;
+								}
+							}
+						}
+						await AddStainCPT(specialProcedure.LabelDescription, subCase, fromLoad, billedCpts, stainsBillingDataAccess);
+					}
+				}
+			}
+		}
+		logger.Trace("Success End.");
+	}
+	catch (Exception exception)
+	{
+		logger.Error(exception);
+		logger.Trace("End, Failed Unkown Error: " + exception.Message);
+	}
+}
+```
+
+### Nested statements
+-   A method should only have 1 level of nesting at most.
+
+**Bad**
+
+```csharp
+if(condition1) {
+    if(condition2) {
+        if(condition3) {
+            return 'Working properly!';
+        } else {
+            return 'Third thing broken.';
+        }
+    } else {
+        return 'Second thing broken.';
+    }
+} else {
+    return 'First thing broken.';
+}
+```
+
+**Good**
+
+```csharp
+if(!condition1) {
+    return 'First thing broken.';
+}
+if(!condition2) {
+    return 'Second thing broken.';
+}
+if(!condition3) {
+    return 'Third thing broken.';
+}
+
+return 'Working properly!';
+```
+
+### Use consistent capitalization
+
+- private fields should have camelCase
+- everything else should have PascalCase
+
+**Bad:**
+
+```csharp
+private int DAYS_IN_WEEK = 7;
+private int DaysInMonth = 30;
+
+public string name { get; set; }
+
+void eraseDatabase() {}
+void Restore_database() {}
+
+class animal {}
+class Alpacawool {}
+```
+
+**Good:**
+
+```csharp
+private int daysInWeek = 7;
+private int daysInMonth = 30;
+
+public string Name { get; set; }
+
+void EraseDatabase() {}
+void RestoreDatabase() {}
+
+class Animal {}
+class AlpacaWool {}
+```
+
+**[⬆ back to top](#table-of-contents)**
+
+### Function callers and callees should be close
+
+- If a function calls another, keep those functions vertically close in the source file. 
+- Ideally, keep the caller right above the callee. We tend to read code from top-to-bottom, like a newspaper.
+
+**Bad:**
+
+```csharp
+class PerformanceReview {
+  public PerformanceReview(Employee employee) {
+    this.employee = employee;
+  }
+
+  private Employee LookupPeers() {
+    return db.Lookup(this.employee, "peers");
+  }
+
+  private Employee LookupManager() {
+    return db.Lookup(this.employee, "manager");
+  }
+
+  private Review[] GetPeerReviews() {
+    var peers = this.LookupPeers();
+    // ...
+  }
+
+  public Review[] PerfReview() {
+	return this.GetPeerReviews()
+	  .Union(this.GetManagerReview())
+	  .Union(this.GetSelfReview())
+	  .ToArray();
+  }
+  
+  private Review GetManagerReview() {
+    var manager = this.LookupManager();
+    // ...
+  }
+
+  private Review GetSelfReview() {
+    // ...
+  }
+}
+```
+
+**Good:**
+
+```csharp
+class PerformanceReview {
+  public PerformanceReview(Employee employee) {
+    this.employee = employee;
+  }
+
+  public Review[] GetPerfReview() {
+	return this.GetPeerReviews()
+	  .Union(this.GetManagerReview())
+	  .Union(this.GetSelfReview())
+	  .ToArray();
+  }
+
+  private Review[] GetPeerReviews() {
+    var peers = this.LookupPeers();
+    // ...
+  }
+
+  private Employee LookupPeers() {
+    return db.Lookup(this.employee, "peers");
+  }
+
+  private Review GetManagerReview() {
+    var manager = this.LookupManager();
+    // ...
+  }
+
+  private Employee LookupManager() {
+    return db.Lookup(this.employee, "manager");
+  }
+
+  private Review GetSelfReview() {
+    // ...
+  }
+}
+```
+
+**[⬆ back to top](#table-of-contents)**
+
+## **Comments**
+
+### Only comment things that have business logic complexity.
+
+- Comments are an apology, not a requirement. 
+- Good code _mostly_ documents itself.
+- Don’t Use a Comment When You Can Use a Function or a Variable.
+- Don't document non public code.
+
+**Bad:**
+
+```csharp
+// Check to see if the employee is eligible for full benefits
+if ((employee.flags & HOURLY_FLAG) && (employee.age > 65))
+```
+
+**Good:**
+
+```csharp
+if (employee.isEligibleForFullBenefits())
+```
+
+**[⬆ back to top](#table-of-contents)**
+
+### Don't leave commented out code in your code
+
+GIT exists for a reason. Leave old code in the history.
+
+### Don't have journal comments
+
+Remember, use GIT!
+
+**Bad:**
+
+```csharp
+/**
+ * 2016-12-20: Removed monads, didn't understand them (RM)
+ * 2016-10-01: Improved using special monads (JP)
+ * 2016-02-03: Removed type-checking (LI)
+ * 2015-03-14: Added combine with type-checking (JR)
+ */
+string Combine(string a, string b) {
+  return a + b;
+}
+```
+
+**[⬆ back to top](#table-of-contents)**
+
 ## **Variables**
 
 ### Use meaningful and pronounceable variable names
+
+- We will read more code than we will ever write.
+- It's important that the code we do write is readable and searchable. 
+- By _not_ naming variables meaningfully, we hurt our readers and future selves.
 
 **Bad:**
 
@@ -50,9 +339,83 @@ var yyyymmdstr = DateTime.Now.ToString("YYYY/MM/DD");
 var currentDate = DateTime.Now.ToString("YYYY/MM/DD");
 ```
 
+**Another Example**
+
+**Bad**
+
+What does this do?
+```csharp
+string sec2str(int s) {
+    var d = Math.Floor(s / 86400);
+    var hs = s % 86400;
+    var h = Math.Floor(hs / 3600);
+    var ms = hs % 3600;
+    var m = Math.Floor(ms / 60);
+    var rs = ms % 60;
+    var s = Math.Ceil(rs);    
+    return $"{d}:{h}:{m}:{s}";
+}
+```
+
+**Better**
+
+Ok, but how does it work?
+```csharp
+string SecondsToDateTimeString(int s) {
+    var d = Math.Floor(s / 86400);
+    var hs = s % 86400;
+    var h = Math.Floor(hs / 3600);
+    var ms = hs % 3600;
+    var m = Math.Floor(ms / 60);
+    var rs = ms % 60;
+    var s = Math.Ceil(rs);    
+    return $"{d}:{h}:{m}:{s}";
+}
+```
+
+**Even Better**
+
+Starting to understand, but what are d,hs,h,ms,m, ...?
+```csharp
+const int secondsInAMinute = 60;
+const int secondsInAnHour = 60 * secondsInAMinute;
+const int secondsInADay = 24 * secondsInAnHour;
+
+string SecondsToDateTimeString(int s) {
+    var d = Math.Floor(s / secondsInADay );
+    var hs = s % secondsInADay ;
+    var h = Math.Floor(hs / secondsInAnHour );
+    var ms = hs % secondsInAnHour ;
+    var m = Math.Floor(ms / secondsInAMinute );
+    var rs = ms % secondsInAMinute ;
+    var s = Math.Ceil(rs);    
+    return $"{d}:{h}:{m}:{s}";
+}
+```
+
+**Even more Better**
+
+```csharp
+const int secondsInAMinute = 60;
+const int secondsInAnHour = 60 * secondsInAMinute;
+const int secondsInADay = 24 * secondsInAnHour;
+
+string SecondsToDateTimeString(int inputSeconds) {
+    var days = Math.Floor(seconds / secondsInADay);
+    var hourSeconds = seconds % secondsInADay;
+    var hours = Math.Floor(hourSeconds / secondsInAnHour);
+    var minuteSeconds = hourSeconds % secondsInAnHour;
+    var minutes = Math.Floor(minuteSeconds / secondsInAMinute);
+    var remainingSeconds = minuteSeconds % secondsInAMinute;
+    var seconds = Math.Ceil(remainingSeconds);    
+
+    return $"{days}:{hours}:{minutes}:{seconds}";
+}
+```
+
 **[⬆ back to top](#table-of-contents)**
 
-### Use the same vocabulary for the same type of variable
+### Consistency: Use the same vocabulary for the same type of variable
 
 **Bad:**
 
@@ -100,27 +463,6 @@ if(value < MinValue || value > MaxValue) {
 }
 ```
 
-### Meaningful Names
-- We will read more code than we will ever write.
-- It's important that the code we do write is readable and searchable. 
-- By _not_ naming variables meaningfully, we hurt our readers and future selves.
-
-**Bad:**
-
-```csharp
-// What the heck is 86400000 for?
-var d = ms % 86400000;
-```
-
-**Good:**
-
-```csharp
-// Declare them as capitalized named constants.
-const int MilliSecondsPerDay = 60 * 60 * 24 * 1000; //86400000;
-
-var days = milliSeconds % MilliSecondsPerDay;
-```
-
 **[⬆ back to top](#table-of-contents)**
 
 ### Use explanatory variables
@@ -141,10 +483,8 @@ saveCityZipCode(
 ```csharp
 var address = "One Infinite Loop, Cupertino 95014";
 var cityZipCodeRegex = new Regex("^[^,\\\\]+[,\\\\\\s]+(.+?)\\s*(\\d{5})?$");
-
 var city = cityZipCodeRegex.Match(address).Captures[1];
 var zipCode = cityZipCodeRegex.Match(address).Captures[2];
-
 saveCityZipCode(city, zipCode);
 ```
 
@@ -214,10 +554,58 @@ class Car {
 
 ## **Functions**
 
+### Functions names should be verbs:
+
+-   Functions always do an action.
+-   Actions are represented by verbs.    
+-   Helps distinguishing between functions and classes.
+
+**Bad:**
+
+```csharp
+bool AlphanumericChecker(char c)
+string TextParser(string text)
+```
+
+**Good:**
+
+```csharp
+bool IsAlphanumeric(char c)
+string ParseText(string text)
+```
+
+### Function names should say what they do
+
+**Bad:**
+
+```csharp
+void AddToDate(DateTime date, int month) {
+  // ...
+}
+
+var date = DateTime.Now;
+
+// It's hard to tell from the function name what is added
+AddToDate(date, 1);
+```
+
+**Good:**
+
+```javascript
+void AddMonthToDate(int month, DateTime date) {
+  // ...
+}
+
+var date = DateTime.Now;
+AddMonthToDate(1, date);
+```
+
+**[⬆ back to top](#table-of-contents)**
+
 ### Arguments
 
 -   A function that needs no argument is the best type of functions.
--   The more the the argument number increase, the harder the function is to understand and maintain.
+-   The more the argument number increase, the harder the function is to understand and maintain.
 -   Too many arguments could be caused by a bad architecture and design.
 -   Too many arguments could mean that the function has too many responsibilities.  
 -   When adding an argument to a function, make sure you’re not breaking OOP principles.
@@ -244,7 +632,7 @@ float GetMagnitude(Point p)
 
 - This is by far the most important rule in software engineering.
 - When functions do more than one thing, they are harder to compose, test, and reason about.
-- When you isolate a function to a single action, it can be refactored easily and your code will read much cleaner.
+- When you isolate a function to one action, it can be refactored easily and will read much cleaner.
 - If you take nothing else away from this guide other than this, you'll be ahead of many developers.
 
 **Bad:**
@@ -299,36 +687,9 @@ private void EmailClient(int clientId)
 
 **[⬆ back to top](#table-of-contents)**
 
-### Function names should say what they do
+### Law of Demeter
 
-**Bad:**
-
-```csharp
-void AddToDate(DateTime date, int month) {
-  // ...
-}
-
-var date = DateTime.Now;
-
-// It's hard to tell from the function name what is added
-AddToDate(date, 1);
-```
-
-**Good:**
-
-```javascript
-void AddMonthToDate(int month, DateTime date) {
-  // ...
-}
-
-var date = DateTime.Now;
-AddMonthToDate(1, date);
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Functions should only be one level of abstraction
-
+- "Each unit should only talk to its friends; don't talk to strangers."
 - When you have more than one level of abstraction your function is usually doing too much.
 - Splitting up functions leads to reusability and easier testing.
 
@@ -338,15 +699,14 @@ AddMonthToDate(1, date);
 House CreateHouse(int nbWalls, int wallSize) {
 	var house = new House();
 	house.DigFoundations();
-	
 	for(int i = 0 ; i < nbWalls ; i++) {
 		var wall = new Wall();
-		wall.setSize(wallSize);
-		wall.Build();
-		wall.Paint();
+		for(int i = 0 ; i < wall.BrickCount ; i++) {
+			// `House` can talk to its friend `Wall` but not the stranger `Brick`.
+			wall.Bricks.Add(new Brick(wall.BrickSize));
+		}
 		house.Walls.Add(wall);
 	}
-	
 	return house;
 }
 ```
@@ -357,19 +717,17 @@ House CreateHouse(int nbWalls, int wallSize) {
 House CreateHouse(int nbWalls, int wallSize) {
 	var house = new House();
 	house.DigFoundations();
-	
 	for(int i = 0 ; i < nbWalls ; i++) {
 		house.Wall.Add(CreateWall(wallSize));
 	}
-
 	return house;
 }
 
 Wall CreateWall(int wallSize) {
 	var wall = new Wall();
-	wall.setSize(wallSize);
-	wall.Build();
-	wall.Paint();
+	for(int i = 0 ; i < wall.BrickCount ; i++) {
+		wall.Bricks.Add(new Brick(wall.BrickSize));
+	}
 	return wall;
 }
 ```
@@ -487,10 +845,6 @@ void ShowEmployeeList(List<Employee> employees)
 
 **[⬆ back to top](#table-of-contents)**
 
-
-
-**[⬆ back to top](#table-of-contents)**
-
 ### Don't use flags as function parameters
 
 Flags tell your user that this function does more than one thing. Functions should do one thing. Split out your functions if they are following different code paths based on a boolean.
@@ -526,7 +880,6 @@ void  ConvertAndUploadFile(File  f)
 }  
 
 UploadFile(f);
-
 ConvertAndUploadFile(f);
 ```
 
@@ -562,11 +915,11 @@ bool ShouldShowSpinner(fsm, listNode) {
 **Bad:**
 
 ```csharp
-bool IsDOMNodeNotPresent(node) {
+bool IsNodeNotPresent(Node node) {
   // ...
 }
 
-if (!IsDOMNodeNotPresent(node)) {
+if (!IsNodeNotPresent(Node node)) {
   // ...
 }
 ```
@@ -574,11 +927,11 @@ if (!IsDOMNodeNotPresent(node)) {
 **Good:**
 
 ```csharp
-bool IsDOMNodePresent(node) {
+bool IsNodePresent(Node node) {
   // ...
 }
 
-if (IsDOMNodePresent(node)) {
+if (IsNodePresent(Node node)) {
   // ...
 }
 ```
@@ -598,6 +951,7 @@ if (IsDOMNodePresent(node)) {
 ```csharp
 class Airplane {
   // ...
+  
   GetCruisingAltitude() {
     switch (this.type) {
       case "777":
@@ -642,16 +996,113 @@ class Cessna extends Airplane {
 
 **[⬆ back to top](#table-of-contents)**
 
+### Prefer Exceptions to Returning Error Codes
+
+-   When you need an error code, Prefix the method with ‘Try’ to indicate that it can fail without throwing an exception.
+
+**Bad**
+
+```csharp
+CommandResult SendCommand(){
+    var result = Send(command);
+    if(result == ERROR) {
+        ShowMessage('An fatal error has occurred!');
+  return result;
+    }
+    if(result == INVALID) {
+        ShowMessage('Invalid command');
+  return result;
+    }
+    return result;
+}
+```
+
+**Good**
+
+```csharp
+void SendCommand() {
+    try {
+        Send(command);
+    } catch(ValidationException ex) {
+        ShowMessage('Do you want to overwrite?');
+    }
+}
+```
+
+**[⬆ back to top](#table-of-contents)**
+
+### Never catch without throwing
+
+**Bad**
+
+```csharp
+try {
+	//...
+}
+catch (Exception ex) {
+	this.logger.Log(ex);
+}
+```
+
+**Good**
+
+```csharp
+try {
+	//...
+}
+catch (Exception ex) {
+	this.logger.Log(ex);
+	throw;
+}
+```
+
+**[⬆ back to top](#table-of-contents)**
+
+### Never return or pass `Null`
+
+**Bad**
+
+```csharp
+Response Do(){
+	try {
+		Send(null);
+	} catch {
+		return null;
+	}
+}
+```
+
+**Good**
+
+```csharp
+Response Do(){
+	try {
+		SendEmpty();
+	} catch {
+		throw;
+	}
+}
+```
+
+**[⬆ back to top](#table-of-contents)**
+
 ### Don't pre-optimize
 
 - Prefer code clarity and cleanliness over presumed performance.
-- Obvious optimizations are ok (ex: avoid string concatenation in loops, avoid repeated function calls, etc...)
+- Obvious optimizations are ok (ex: avoid string concatenation in loops, avoid repeated calls, etc...)
 - Optimizations without measurements are almost always evil.
 - For anything other than simple optimizations, it's better 
 
 **[⬆ back to top](#table-of-contents)**
 
 ## **Classes**
+
+### Naming Conventions
+- Class Names should be nouns.
+- Method Names should be verbs.
+- Abstract Classes  Names should end with ‘Base’
+- Interface Names should start with ‘I’
+- Async Method Names should end with ‘Async’
 
 ### Use getters and setters and make all fields private.
 
@@ -969,7 +1420,7 @@ RenderLargeRectangles(rectangles);
 
 **Good:**
 
-As opposed to Mathematics, in the OOP world, a square is not a rectangle, because it require a different set of properties to describe it.
+As opposed to Mathematics, in the OOP world, a square is not a rectangle, because it require a different set of properties to implement it.
 ```csharp
 class Shape {
   public abstract void SetColor(Color color) {
@@ -1082,7 +1533,7 @@ In friendlier terms:
 
  1. A class should not create it's own dependencies, they can create DTOs and simple Models though.
  2. It's better to depend upon interfaces and abstract classes then upon classes.
- 3. A dependency injection framework or the Factory pattern should be used to inject dependencies.
+ 3. A dependency injection framework or the `Factory` pattern should be used to inject dependencies.
 
 **Bad:**
 
@@ -1133,252 +1584,5 @@ public class Client {
 The more high-level you get the more permutation you will have to do.
 That's why the more high-level you get the fewer tests you should have.
 And the more low-level you get the more permutation you need to test.
-
-**[⬆ back to top](#table-of-contents)**
-
-## **Formatting**
-
-- Formatting is subjective. Like many rules herein, there is no hard and fast
-rule that you must follow.
-- The main point is to have a consistent style between all the developers.
-- There are tons of tools to automate this.
-
-### Function size
-
-You should not have to scroll horizontally or vertically to read the function.
-
-**Bad:**
-```csharp
-public async Task RecomputeCPTs(IStainsBillingDataAccess stainsBillingDataAccess, bool fromLoad)
-{
-	try
-	{
-		logger.Trace("Start.");
-		if ((isAutoBillStainsForBilledCases || !caseBilledChecker.IsCaseBilled()) && isAutoBillStains && !flagValueGetter.GetFlagValue("Disable Auto Billing"))
-		{
-			//remove all cpts related to stains that are not billed
-			Dictionary<string, int> billedCpts = new Dictionary<string, int>();
-			var stainsBillingModels = getStainsBillingModels();
-			foreach (var billing in stainsBillingModels.SelectMany(s => s.Billings))
-			{
-				if (!string.IsNullOrWhiteSpace(billing.CPTCode) &&
-					await stainsBillingDataAccess.IsCPTRelatedToStain(CPTViewModel.GetCPTOnly(billing.CPTCode), isChangeCPTForRepeatedValues))
-				{
-					if (!billing.Billed && !(billing.CPTCodeCredits ?? false))
-					{
-						billing.CPTCode = "";
-						billing.Origin = null;
-					}
-					else if (!(billing.CPTCodeCredits ?? false))
-					{
-						var Code = CPTViewModel.GetCPTOnly(billing.CPTCode);
-						var Multiplier = CPTViewModel.GetMultiplier(billing.CPTCode);
-						if (billedCpts.ContainsKey(Code)) billedCpts[Code] = billedCpts[Code] + Multiplier;
-						else billedCpts.Add(Code, Multiplier);
-					}
-				}
-			}
-			//re-add all related cpts
-			List<string> lstHEStains = new List<string>();
-			foreach (var subCase in stainsBillingModels)
-			{
-				bool heStainsExists = false;
-				foreach (var specialProcedure in subCase.SpecialProcedures)
-				{
-					if (!string.IsNullOrWhiteSpace(specialProcedure.LabelDescription))
-					{
-						if (isHEBillOnceOption)
-						{
-							if (IsHEStain(specialProcedure.LabelDescription))
-							{
-								if (heStainsExists) continue;
-								else
-								{
-									heStainsExists = true;
-								}
-							}
-						}
-						await AddStainCPT(specialProcedure.LabelDescription, subCase, fromLoad, billedCpts, stainsBillingDataAccess);
-					}
-				}
-			}
-		}
-		logger.Trace("Success End.");
-	}
-	catch (Exception exception)
-	{
-		logger.Error(exception);
-		logger.Trace("End, Failed Unkown Error: " + exception.Message);
-	}
-}
-```
-
-### Use consistent capitalization
-
-- private fields should have camelCase
-- everything else should have PascalCase
-
-**Bad:**
-
-```csharp
-private int DAYS_IN_WEEK = 7;
-private int DaysInMonth = 30;
-
-public string name { get; set; }
-
-void eraseDatabase() {}
-void Restore_database() {}
-
-class animal {}
-class Alpacawool {}
-```
-
-**Good:**
-
-```csharp
-private int daysInWeek = 7;
-private int daysInMonth = 30;
-
-public string Name { get; set; }
-
-void EraseDatabase() {}
-void RestoreDatabase() {}
-
-class Animal {}
-class AlpacaWool {}
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Function callers and callees should be close
-
-- If a function calls another, keep those functions vertically close in the source file. 
-- Ideally, keep the caller right above the callee. We tend to read code from top-to-bottom, like a newspaper.
-
-**Bad:**
-
-```csharp
-class PerformanceReview {
-  public PerformanceReview(Employee employee) {
-    this.employee = employee;
-  }
-
-  private Employee LookupPeers() {
-    return db.Lookup(this.employee, "peers");
-  }
-
-  private Employee LookupManager() {
-    return db.Lookup(this.employee, "manager");
-  }
-
-  private Review[] GetPeerReviews() {
-    var peers = this.LookupPeers();
-    // ...
-  }
-
-  public Review[] PerfReview() {
-	return this.GetPeerReviews()
-	  .Union(this.GetManagerReview())
-	  .Union(this.GetSelfReview())
-	  .ToArray();
-  }
-  
-  private Review GetManagerReview() {
-    var manager = this.LookupManager();
-    // ...
-  }
-
-  private Review GetSelfReview() {
-    // ...
-  }
-}
-```
-
-**Good:**
-
-```csharp
-class PerformanceReview {
-  public PerformanceReview(Employee employee) {
-    this.employee = employee;
-  }
-
-  public Review[] GetPerfReview() {
-	return this.GetPeerReviews()
-	  .Union(this.GetManagerReview())
-	  .Union(this.GetSelfReview())
-	  .ToArray();
-  }
-
-  private Review[] GetPeerReviews() {
-    var peers = this.LookupPeers();
-    // ...
-  }
-
-  private Employee LookupPeers() {
-    return db.Lookup(this.employee, "peers");
-  }
-
-  private Review GetManagerReview() {
-    var manager = this.LookupManager();
-    // ...
-  }
-
-  private Employee LookupManager() {
-    return db.Lookup(this.employee, "manager");
-  }
-
-  private Review GetSelfReview() {
-    // ...
-  }
-}
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-## **Comments**
-
-### Only comment things that have business logic complexity.
-
-- Comments are an apology, not a requirement. 
-- Good code _mostly_ documents itself.
-- Don’t Use a Comment When You Can Use a Function or a Variable.
-- Don't document non public code.
-
-**Bad:**
-
-```csharp
-// Check to see if the employee is eligible for full benefits
-if ((employee.flags & HOURLY_FLAG) && (employee.age > 65))
-```
-
-**Good:**
-
-```csharp
-if (employee.isEligibleForFullBenefits())
-```
-
-**[⬆ back to top](#table-of-contents)**
-
-### Don't leave commented out code in your codebase
-
-GIT exists for a reason. Leave old code in the history.
-
-### Don't have journal comments
-
-Remember, use GIT!
-
-**Bad:**
-
-```csharp
-/**
- * 2016-12-20: Removed monads, didn't understand them (RM)
- * 2016-10-01: Improved using special monads (JP)
- * 2016-02-03: Removed type-checking (LI)
- * 2015-03-14: Added combine with type-checking (JR)
- */
-string Combine(string a, string b) {
-  return a + b;
-}
-```
 
 **[⬆ back to top](#table-of-contents)**
