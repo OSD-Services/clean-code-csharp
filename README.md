@@ -591,7 +591,7 @@ AddToDate(date, 1);
 
 **Good:**
 
-```javascript
+```csharp
 void AddMonthToDate(int month, DateTime date) {
   // ...
 }
@@ -1586,3 +1586,83 @@ That's why the more high-level you get the fewer tests you should have.
 And the more low-level you get the more permutation you need to test.
 
 **[⬆ back to top](#table-of-contents)**
+
+### TDD (Test Driven Development)
+
+The Three Laws of TDD
+-   **First Law**  You may not write production code until you have written a failing unit test.
+-   **Second Law**  You may not write more of a unit tests than is sufficient to fail, and not compiling is failing.
+-   **Third Law**  You may not write more production code than is sufficient to pass the currently failing tests.
+
+### Name Your Tests Clearly and Don’t Be Afraid of Long Names
+
+- The format should be: **MethodName_StateUnderTest_ExpectedBehavior**
+- Example: AdmitStudent_MissingMandatoryFields_FailToAdmit is perfectly acceptable.
+
+### Test One Thing at a Time
+
+- Test one scenario and one function at a time.
+
+### Follow the AAA Rule: Arrange, Act, Assert
+
+- **Arrange**: set things up to be tested.
+- **Act**: call the method being tested.
+- **Assert**: verify the result.
+
+**Bad**
+
+```csharp
+[Fact]
+public void Get_LockObject_Test() {
+	Assert.Equal(fakeCacheStore.PendingCasesCache, (new FakeCacheStore()).lockObject);
+}
+```
+
+**Good**
+
+```csharp
+[Fact]
+public void Get_LockObject_Test() {
+	// Arrange
+	var fakeCacheStore = new FakeCacheStore
+	{
+		PendingCasesCache = new Dictionary<string, PendingCaseCacheModel>(),
+	};
+	var manager = CreateManager(fakeCacheStore);
+	
+	// Act
+	var result = manager.lockObject;
+	
+	// Assert
+	Assert.Equal(fakeCacheStore.PendingCasesCache, result);
+}
+```
+
+### Write Simple Tests First
+
+- The first tests you write should be the simplest.
+- Make sure that your code can do 1 + 1 = 2 first.
+
+### Test Across Boundaries
+
+- Unit tests should test both sides of a given boundary.
+
+### Cover Every Code Path
+
+- Make sure all conditional branches and validations are being tested.
+- Make use of a code coverage tool.
+
+### Handling bugs
+
+- When receiving a bug report, first try to write a unit test that fail then fix the bug and not vice-versa.
+
+### Tests should not depend on each other
+
+- All classes should be tested in isolation.
+- They should not depend on anything other than mocks and stubs.
+- The order of test execution or running multiple tests in parallel should not affect the result
+
+### Test Should be repeatable in any environment
+
+- Tests should be repeatable in any environment without varying results
+- Should not depend on a network or a database or a file system.
