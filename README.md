@@ -11,7 +11,6 @@
 6. [Classes](#classes)
 7. [SOLID](#solid)
 8. [Testing](#testing)
-9. [Error Handling](#error-handling)
 
 ## Introduction
 
@@ -1104,10 +1103,10 @@ Response Do(){
 - Interface Names should start with ‘I’
 - Async Method Names should end with ‘Async’
 
-### Use getters and setters and make all fields private.
+### Encapsulation  
 
-"Why?" you might ask. Well, here's why:
-
+- Use getters and setters and make all fields private.
+- Put all the logic that manipulates a class's fields into the class itself.
 - When you want to do more beyond getting an object property, you don't have to look up and change every accessor in your codebase.
 - Makes adding validation simple when doing a `set`.
 - Encapsulates the internal representation.
