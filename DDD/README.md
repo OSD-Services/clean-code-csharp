@@ -1,5 +1,4 @@
 
-
 # Domain Driven Design
 
 ## Table of Contents
@@ -152,19 +151,82 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 ![Context Maps](https://thedomaindrivendesign.io/wp-content/uploads/2019/03/ContextMap.png)
 
 ### 2.6 Integration Patterns
+There are several ways to relate  _Bounded Contexts_:
+
+#### Shared Kernel
+A shared context between two or more teams, which reduces duplication of code, however, any changes must be combined and notified between teams.
+![4. Integrating Bounded Contexts - Learning Domain-Driven Design [Book]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/assets/lddd_0402.png)
+#### Customer / Supplier
+It is a relationship between client (downstream) and server (upstream), where the teams are in continuous integration.
+![4. Context Mapping - What Is Domain-Driven Design? [Book]](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0403.png)
+#### Partner
+It is the scenario where teams are dependent and need to have a cooperative relationship so that they can meet the development needs of both systems.
+![Partnership](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0401.png)
+#### Conformist
+It is the scenario that involves the upstream and downstream teams, but in this model the upstream team has no motivation to meet the needs of the downstream team.
+
+![Conformist](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0404.png)
+
+#### Anti Corruption Layer
+It is the scenario where the client (downstream) creates an intermediate layer that communicates with the upstream context, to meet its own domain model.
+![Anticorruption layer](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0405.png)
+
+#### Open Host Service
+Communication achived by defining protocol from a bounded context. So, who need to integrate with with this context will use this protocol.
+![Open host service](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0406.png)
+
+#### Published Language
+Published language is often combined with Open Host Service. Communication between bounded contexts achived via well documented shared language such as XML, gRPC etc.
 
 ## 3. Tactical Design
 
 ### 3.1. Value Objects
+- A value object has no identity. It is defined only by the values of its attributes.
+- Value objects are immutable i.e. they can't be modified.
+- To update a value object, you always create a new instance to replace the old one.
+- Value objects can have methods, but those methods should not change the object.
+- Typical examples of value objects include colors, dates and times, and currency values.
 
 ### 3.2. Entities
+An entity is an object with a unique identity that persists over time. For example, in a banking application, customers and accounts would be entities.
+
+- Has a unique id. Doesn't have to always be exposed to users.
+- An id may span multiple bounded contexts.
+- An entity can hold references to other entities.
+
+Example:
+![UML diagram of the Delivery aggregate](https://docs.microsoft.com/en-us/azure/architecture/microservices/images/delivery-entity.png)
+
+`Delivery` is an **Entity**, `REF`, `Location`, and `Confirmation` are **Value Objects**.
+
+
 
 ### 3.3. Aggregates
+- An aggregate defines a consistency boundary around one or more entities.
+- Exactly one entity in an aggregate is the root. Lookup is done using the root entity's id. 
+- Any other entities in the aggregate are children of the root, and are referenced indirectly using the root.
+![How to Design & Persist Aggregates - Domain-Driven Design w/ TypeScript |  Khalil Stemmler](https://d33wubrfki0l68.cloudfront.net/d7af329ed65f5754cc17833a4609154febf70c98/a3fa0/img/blog/ddd-aggregates/aggregate-clump.svg)
 
 ### 3.4. Services
+- A service is an object that implements some logic without holding any state.
+- Domain Service: contains domain logic, usually interaction between multiple entities/models.
+- Application Service: contains technical functionality, usually database and API calls.
 
 ### 3.5. Repositories
+- A Repository  is in charge of persistence: Lookup and Saving.
+- They centralize common data access functionality, providing better maintainability and decoupling.
+- Define one repository per aggregate
+- Repositories are not mandatory, use them when the persistence logic is complex and worth separating.
+
+![Diagram showing relationships of domain and other infrastructure.](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/media/infrastructure-persistence-layer-design/repository-aggregate-database-table-relationships.png)
 
 ### 3.6. Factories
+- A Factory is an object that has the sole responsibility to create other objects.
+- Standardizes the instantiation of an object.
+- Objects should not be responsible for the creation of other objects.
+- Factories are most needed when constructing complex entities, or to choose a particular implementation of an interface based on some state.
+
+### 3.7 Typical Architecture
+![The Domain Driven Design's Missing Pattern | by Carmine Ingaldi | The  Startup | Medium](https://miro.medium.com/max/1130/1*SwCCHeau9wFEBDoZ8vIaBw.png)
 
 **[⬆ back to top](#table-of-contents)**
