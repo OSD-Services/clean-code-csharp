@@ -102,7 +102,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 - identifies real world entities and the relationships between them.
 - _not_  the same as a data model.
 
-![](https://upload.wikimedia.org/wikipedia/commons/2/2d/Domain_model.png)
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Domain_model.png" width="750"/>
 
 ### 2.3. Ubiquitous Language
 
@@ -124,7 +124,8 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 - A **Bounded Context** can be implemented as it's own **microservice** or as a part of a **monolithic** system.
 
 #### Example
-![](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/bounded-context.png?raw=true)
+
+<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/bounded-context.png?raw=true" alt="Conformist" width="650"/>
 
 - What a `Customer` means in the **Sales** context might be completely different from the **Support** context.
 - That's why we have 2 different `Customer` and `Product` entities, each is tailored for the needs of it's context.
@@ -198,6 +199,7 @@ An entity is an object with a unique identity that persists over time. For examp
 - An entity can hold references to other entities.
 
 Example:
+
 ![UML diagram of the Delivery aggregate](https://docs.microsoft.com/en-us/azure/architecture/microservices/images/delivery-entity.png)
 
 `Delivery` is an **Entity**, `REF`, `Location`, and `Confirmation` are **Value Objects**.
