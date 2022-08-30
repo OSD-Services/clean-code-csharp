@@ -30,6 +30,8 @@
 	
 	3.6. [Factories](#factories)
 
+4. [Architecture](#architecture)
+
 ## 1. Introduction
 
 **Domain-Driven Design**  (DDD) has been around since  **Eric Evans**  published his book about the subject in 2003. 
@@ -139,8 +141,8 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 ![context-relationships.png](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/context-relationships.png?raw=true)
 
 ### 2.5. Context Map
-
-- _Context Maps_ help in understanding the whole project, being able to show the relationships between the different _Bounded Contexts_.
+ _Context Maps_ help in understanding the whole project, being able to show the relationships between the different _Bounded Contexts_.
+ 
 ![Context Maps](https://thedomaindrivendesign.io/wp-content/uploads/2019/03/ContextMap.png)
 
 ### 2.6 Integration Patterns
@@ -202,8 +204,13 @@ Example:
 
 ### 3.3. Aggregates
 - An aggregate defines a consistency boundary around one or more entities.
-- Exactly one entity in an aggregate is the root. Lookup is done using the root entity's id. 
+- Exactly one entity in an aggregate is the root. Lookup is done using the root entity's id.
 - Any other entities in the aggregate are children of the root, and are referenced indirectly using the root.
+
+#### Aggregate characteristics
+- Same Lifetime: If the aggregate root is deleted, all other entities in the aggregation should be deleted at the same time.
+- Same Domain: Objects that do not belong to the same problem domain should not appear in the same aggregation.
+- Same Transaction: Objects that are often operated on at the same time often belong to the same aggregation.
 
 ![How to Design & Persist Aggregates - Domain-Driven Design w/ TypeScript |  Khalil Stemmler](https://d33wubrfki0l68.cloudfront.net/d7af329ed65f5754cc17833a4609154febf70c98/a3fa0/img/blog/ddd-aggregates/aggregate-clump.svg)
 
@@ -215,7 +222,7 @@ Example:
 ### 3.5. Repositories
 - A Repository  is in charge of persistence: Lookup and Saving.
 - They centralize common data access functionality, providing better maintainability and decoupling.
-- Define one repository per aggregate
+- Define one repository per aggregate.
 - Repositories are not mandatory, use them when the persistence logic is complex and worth separating.
 
 ![Diagram showing relationships of domain and other infrastructure.](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/media/infrastructure-persistence-layer-design/repository-aggregate-database-table-relationships.png)
@@ -226,7 +233,9 @@ Example:
 - Objects should not be responsible for the creation of other objects.
 - Factories are most needed when constructing complex entities, or to choose a particular implementation of an interface based on some state.
 
-### 3.7 Typical Architecture
+## 4. Architecture
+
+
 
 ![The Domain Driven Design's Missing Pattern | by Carmine Ingaldi | The  Startup | Medium](https://miro.medium.com/max/1130/1*SwCCHeau9wFEBDoZ8vIaBw.png)
 
