@@ -122,7 +122,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 - A **Bounded Context** can be implemented as it's own **microservice** or as a part of a **monolithic** system.
 
 #### Example
-![](https://www.martinfowler.com/bliki/images/boundedContext/sketch.png)
+![](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/bounded-context.png?raw=true)
 
 - What a `Customer` means in the **Sales** context might be completely different from the **Support** context.
 - That's why we have 2 different `Customer` and `Product` entities, each is tailored for the needs of it's context.
@@ -148,14 +148,17 @@ There are several ways to relate  _Bounded Contexts_:
 
 #### Shared Kernel
 A shared context between two or more teams, which reduces duplication of code, however, any changes must be combined and notified between teams.
+
 ![4. Integrating Bounded Contexts - Learning Domain-Driven Design [Book]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/assets/lddd_0402.png)
 
 #### Customer / Supplier
 It is a relationship between client (downstream) and server (upstream), where the teams are in continuous integration.
+
 ![4. Context Mapping - What Is Domain-Driven Design? [Book]](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0403.png)
 
 #### Partner
 It is the scenario where teams are dependent and need to have a cooperative relationship so that they can meet the development needs of both systems.
+
 ![Partnership](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0401.png)
 
 #### Conformist
@@ -165,10 +168,12 @@ It is the scenario that involves the upstream and downstream teams, but in this 
 
 #### Anti Corruption Layer
 It is the scenario where the client (downstream) creates an intermediate layer that communicates with the upstream context, to meet its own domain model.
+
 ![Anticorruption layer](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0405.png)
 
 #### Open Host Service
 Communication achived by defining protocol from a bounded context. So, who need to integrate with with this context will use this protocol.
+
 ![Open host service](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0406.png)
 
 #### Published Language
@@ -199,6 +204,7 @@ Example:
 - An aggregate defines a consistency boundary around one or more entities.
 - Exactly one entity in an aggregate is the root. Lookup is done using the root entity's id. 
 - Any other entities in the aggregate are children of the root, and are referenced indirectly using the root.
+
 ![How to Design & Persist Aggregates - Domain-Driven Design w/ TypeScript |  Khalil Stemmler](https://d33wubrfki0l68.cloudfront.net/d7af329ed65f5754cc17833a4609154febf70c98/a3fa0/img/blog/ddd-aggregates/aggregate-clump.svg)
 
 ### 3.4. Services
@@ -221,6 +227,7 @@ Example:
 - Factories are most needed when constructing complex entities, or to choose a particular implementation of an interface based on some state.
 
 ### 3.7 Typical Architecture
+
 ![The Domain Driven Design's Missing Pattern | by Carmine Ingaldi | The  Startup | Medium](https://miro.medium.com/max/1130/1*SwCCHeau9wFEBDoZ8vIaBw.png)
 
 **[⬆ back to top](#table-of-contents)**
