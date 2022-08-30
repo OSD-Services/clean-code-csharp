@@ -229,8 +229,6 @@ Example:
 - Define one repository per aggregate.
 - Repositories are not mandatory, use them when the persistence logic is complex and worth separating.
 
-![Diagram showing relationships of domain and other infrastructure.]()
-
 <img src="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/media/infrastructure-persistence-layer-design/repository-aggregate-database-table-relationships.png" alt="Conformist" width="750"/>
 
 ### 3.6. Factories
