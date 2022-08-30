@@ -151,32 +151,32 @@ There are several ways to relate  _Bounded Contexts_:
 #### Shared Kernel
 A shared context between two or more teams, which reduces duplication of code, however, any changes must be combined and notified between teams.
 
-![4. Integrating Bounded Contexts - Learning Domain-Driven Design [Book]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/assets/lddd_0402.png)
+<img src="https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/assets/lddd_0402.png" alt="Partnership" width="400"/>
 
 #### Customer / Supplier
 It is a relationship between client (downstream) and server (upstream), where the teams are in continuous integration.
 
-![4. Context Mapping - What Is Domain-Driven Design? [Book]](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0403.png)
+<img src="https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0403.png" alt="Partnership" width="500"/>
 
 #### Partner
 It is the scenario where teams are dependent and need to have a cooperative relationship so that they can meet the development needs of both systems.
 
-![Partnership](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0401.png)
+<img src="https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0401.png" alt="Partnership" width="500"/>
 
 #### Conformist
 It is the scenario that involves the upstream and downstream teams, but in this model the upstream team has no motivation to meet the needs of the downstream team.
 
-![Conformist](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0404.png)
+<img src="https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0404.png" alt="Conformist" width="500"/>
 
 #### Anti Corruption Layer
 It is the scenario where the client (downstream) creates an intermediate layer that communicates with the upstream context, to meet its own domain model.
 
-![Anticorruption layer](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0405.png)
+<img src="https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0405.png" alt="Conformist" width="500"/>
 
 #### Open Host Service
 Communication achived by defining protocol from a bounded context. So, who need to integrate with with this context will use this protocol.
 
-![Open host service](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0406.png)
+<img src="https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0406.png" alt="Conformist" width="500"/>
 
 #### Published Language
 Published language is often combined with Open Host Service. Communication between bounded contexts achived via well documented shared language such as XML, gRPC etc.
@@ -212,7 +212,9 @@ Example:
 - Same Domain: Objects that do not belong to the same problem domain should not appear in the same aggregation.
 - Same Transaction: Objects that are often operated on at the same time often belong to the same aggregation.
 
-![How to Design & Persist Aggregates - Domain-Driven Design w/ TypeScript |  Khalil Stemmler](https://d33wubrfki0l68.cloudfront.net/d7af329ed65f5754cc17833a4609154febf70c98/a3fa0/img/blog/ddd-aggregates/aggregate-clump.svg)
+![How to Design & Persist Aggregates - Domain-Driven Design w/ TypeScript |  Khalil Stemmler]()
+
+<img src="https://d33wubrfki0l68.cloudfront.net/d7af329ed65f5754cc17833a4609154febf70c98/a3fa0/img/blog/ddd-aggregates/aggregate-clump.svg" alt="Conformist" width="450"/>
 
 ### 3.4. Services
 - A service is an object that implements some logic without holding any state.
@@ -225,7 +227,9 @@ Example:
 - Define one repository per aggregate.
 - Repositories are not mandatory, use them when the persistence logic is complex and worth separating.
 
-![Diagram showing relationships of domain and other infrastructure.](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/media/infrastructure-persistence-layer-design/repository-aggregate-database-table-relationships.png)
+![Diagram showing relationships of domain and other infrastructure.]()
+
+<img src="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/media/infrastructure-persistence-layer-design/repository-aggregate-database-table-relationships.png" alt="Conformist" width="750"/>
 
 ### 3.6. Factories
 - A Factory is an object that has the sole responsibility to create other objects.
@@ -234,8 +238,6 @@ Example:
 - Factories are most needed when constructing complex entities, or to choose a particular implementation of an interface based on some state.
 
 ## 4. Architecture
-
-
 
 ![The Domain Driven Design's Missing Pattern | by Carmine Ingaldi | The  Startup | Medium](https://miro.medium.com/max/1130/1*SwCCHeau9wFEBDoZ8vIaBw.png)
 
