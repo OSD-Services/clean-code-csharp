@@ -1,4 +1,3 @@
-
 # Domain Driven Design
 
 ## Table of Contents
@@ -30,7 +29,6 @@
 	3.5. [Repositories](#repositories)
 	
 	3.6. [Factories](#factories)
-
 
 ## 1. Introduction
 
@@ -95,10 +93,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 -  **File Archive**  for storing and managing files that are attached to the patient records.   
 -  **Identity Management**  for making sure the right people have access to the right information.
 
-![Example subdomains](https://vaadin.com/static/content/learning-center/learn/tutorials/ddd/01__strategic_domain_driven_design/images/subdomains.png)
-
-
-
+![Example subdomains](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/subdomains.png?raw=true)
 
 ### 2.2. Domain Model
 
@@ -141,9 +136,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 - A **Downstream context** is restricted by the dependencies, but does not worry about breaking others.
 - A context can be both.
 
-![Different ways of documenting context relationships graphically](https://vaadin.com/static/content/learning-center/learn/tutorials/ddd/01__strategic_domain_driven_design/images/context_relationships.png)
-
-
+![context-relationships.png](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/context-relationships.png?raw=true)
 
 ### 2.5. Context Map
 
@@ -156,12 +149,15 @@ There are several ways to relate  _Bounded Contexts_:
 #### Shared Kernel
 A shared context between two or more teams, which reduces duplication of code, however, any changes must be combined and notified between teams.
 ![4. Integrating Bounded Contexts - Learning Domain-Driven Design [Book]](https://www.oreilly.com/library/view/learning-domain-driven-design/9781098100124/assets/lddd_0402.png)
+
 #### Customer / Supplier
 It is a relationship between client (downstream) and server (upstream), where the teams are in continuous integration.
 ![4. Context Mapping - What Is Domain-Driven Design? [Book]](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0403.png)
+
 #### Partner
 It is the scenario where teams are dependent and need to have a cooperative relationship so that they can meet the development needs of both systems.
 ![Partnership](https://www.oreilly.com/library/view/what-is-domain-driven/9781492057802/assets/widd_0401.png)
+
 #### Conformist
 It is the scenario that involves the upstream and downstream teams, but in this model the upstream team has no motivation to meet the needs of the downstream team.
 
@@ -198,8 +194,6 @@ Example:
 ![UML diagram of the Delivery aggregate](https://docs.microsoft.com/en-us/azure/architecture/microservices/images/delivery-entity.png)
 
 `Delivery` is an **Entity**, `REF`, `Location`, and `Confirmation` are **Value Objects**.
-
-
 
 ### 3.3. Aggregates
 - An aggregate defines a consistency boundary around one or more entities.
