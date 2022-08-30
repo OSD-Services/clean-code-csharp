@@ -1,10 +1,10 @@
 # Domain Driven Design
 
 ## Table of Contents
-1. [Introduction](#introduction)
-2. [Strategic Design](#strategic-design)
+1. [Introduction](#1-introduction)
+2. [Strategic Design](#2-strategic-design)
 
-	2.1. [Domain](#domain)
+	2.1. [Domain](#21-domain)
 	
 	2.2. [Domain Model](#domain-model)
 	
