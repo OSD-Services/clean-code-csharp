@@ -32,7 +32,13 @@
 
 4. [Architecture](#4-architecture)
 
-5. [Event Sourcing](#5-event-sourcing)
+5. [Event Storming](#5-event-storming)
+
+	5.1. [Why Event Storming?](#51-why-event-storming)
+	
+	5.2. [Vocabulary](#52-vocabulary)
+
+	5.3. [How does it work?](#53-how-does-it-work)
 
 ## 1. Introduction
 
@@ -245,7 +251,7 @@ Example:
 
 [For further reading:](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/)
 
-## 5. Event Sourcing
+## 5. Event Storming
 
 ### 5.1 Why Event Storming?
 
@@ -265,7 +271,7 @@ Example:
 6.  **Read Model**  (represented as green colored sticky notes): This represents data that may be critical for a user or system to make a decision. It can be helpful when there needs to be an emphasis on what data the user sees.
 7.  **Policy** (represented as purple colored  sticky notes): These represent standards or rules that may need to be executed, such as rules for a compliance policy.
 
-### 5.2 How does it work?
+### 5.3 How does it work?
 
 <img src="https://virtualddd.com/static/0f36aa95d3ea73c85b66651576f53328/a2510/process-picture.jpg">
 
