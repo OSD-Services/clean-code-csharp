@@ -6,31 +6,33 @@
 
 	2.1. [Domain](#21-domain)
 	
-	2.2. [Domain Model](#domain-model)
+	2.2. [Domain Model](#21-domain-model)
 	
-	2.3. [Ubiquitous Language](#ubiquitous-language)
+	2.3. [Ubiquitous Language](#23-ubiquitous-language)
 	
-	2.4. [Bounded Context](#bounded-context)
+	2.4. [Bounded Context](#24-bounded-context)
 	
-	2.5. [Context Map](#context-map)
+	2.5. [Context Map](#25-context-map)
 	
-	2.6 [Integration Patterns](#integration-patterns)
+	2.6 [Integration Patterns](#26-integration-patterns)
 	
-3. [Tactical Design](#tactical-design)
+3. [Tactical Design](#3=tactical-design)
 
-	3.1. [Value Objects](#value-objects)
+	3.1. [Value Objects](#31-value-objects)
 	
-	3.2. [Entities](#entities)
+	3.2. [Entities](#32-entities)
 	
-	3.3. [Aggregates](#aggregates)
+	3.3. [Aggregates](#33-aggregates)
 	
-	3.4. [Services](#services)
+	3.4. [Services](#34-services)
 	
-	3.5. [Repositories](#repositories)
+	3.5. [Repositories](#35-repositories)
 	
-	3.6. [Factories](#factories)
+	3.6. [Factories](#36-factories)
 
-4. [Architecture](#architecture)
+4. [Architecture](#4-architecture)
+
+5. [Event Sourcing](#5-event-sourcing)
 
 ## 1. Introduction
 
@@ -239,6 +241,58 @@ Example:
 
 ## 4. Architecture
 
-![The Domain Driven Design's Missing Pattern | by Carmine Ingaldi | The  Startup | Medium](https://miro.medium.com/max/1130/1*SwCCHeau9wFEBDoZ8vIaBw.png)
+<img src="https://domaindrivendesign.org/wp-content/uploads/2021/06/Architecture.png">
+
+[For further reading:](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/)
+
+## 5. Event Sourcing
+
+### 5.1 Why Event Storming?
+
+1.  It adds  _Time as_  an underlying axes when describing the processes/workflows happening within the business which help exposing the  _Contexts_.
+2. It identifies the  _Capabilities and Relationships_ between _Contexts_.
+3. It identifies the _Domain Model_ belonging to the  _Capability._
+4. It identifies the  _Messages_  and  _Commands_ that are passed across the  _Contexts_ boundary.
+5. Event Storming  _is not_ Domain-Driven Design_._  While event storming is based on several DDD concepts — including bounded contexts and aggregates, event storming focuses on an interactive collaborative whiteboard exercise that engages all domain experts.
+
+### 5.2 Vocabulary
+
+1.  **Commands** (represented with blue colored sticky notes): These are instructions issued to the system so that it takes some action. The system reaches a new state after the action/operation has happened. These can originate from a user or system or by another event. As an example  _Create New Loan Application_ is a command.
+2.  **Events** (represented with orange colored sticky notes): These are something significant that happened within the system when a command has been processed. Typically a domain event causes the generation of new instances of the domain model or alteration of state for existing instances. As it is an  _Observed the Reported_ phenomenon (like Application_Created_, Account_Withdrawn_  and so on) - these are often represented in the past tense. Identification of Events  _is the key._  Often Domain Experts and SMEs spearhead the discovery process of Events.
+3.  **Aggregate** (represented as thin border): These are “things” that a group of events operate on or generate. Typically aggregates are higher-order business entities represented as nouns. As an example  _Loan Application_ is an Aggregate.
+4.  **System**  (represented as pink colored sticky notes): These represent systems involved in the domain. They may issue commands or receive commands along with triggering events. As an example, an external brokering solution which creates Loan Application inside the system, is a system. Systems in this context can be 3rd party services or an internal Self-Contained service that happens to interact with the application in question.
+5.  **User** (represented as yellow colored sticky notes): These are human users involved in the process. They may be a single person or a department/team. Yellow sticky notes help show how complicated the workflow of a business process can be based on the number of departments involved and the amount of back and forth.
+6.  **Read Model**  (represented as green colored sticky notes): This represents data that may be critical for a user or system to make a decision. It can be helpful when there needs to be an emphasis on what data the user sees.
+7.  **Policy** (represented as purple colored  sticky notes): These represent standards or rules that may need to be executed, such as rules for a compliance policy.
+
+### 5.2 How does it work?
+
+<img src="https://virtualddd.com/static/0f36aa95d3ea73c85b66651576f53328/a2510/process-picture.jpg">
+
+1. Event Storming sessions are collaborative workshops among significant stakeholders.
+2. Usually, product owners and development teams meet in a room or online and participate in the session.
+3. Anyone who has a clear understanding of  _what happens within part/all_ of the system should be invited to this meeting.
+
+During the Event Storming process we perform the following steps in sequence:
+
+1.  Identification of Domain Events
+
+<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/1.png?raw=true">
+
+2.  Time Sequencing of Domain Events
+
+<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/2.png?raw=true">
+
+3.  Identification of Triggers/Commands
+
+<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/3.png?raw=true">
+
+4.  Identification of Aggregates
+
+<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/4.png?raw=true">
+
+5.  Identification of Bounded Context
+
+<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/5.png?raw=true">
 
 **[⬆ back to top](#table-of-contents)**
