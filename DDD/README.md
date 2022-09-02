@@ -103,7 +103,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 -  **File Archive**  for storing and managing files that are attached to the patient records.   
 -  **Identity Management**  for making sure the right people have access to the right information.
 
-![Example subdomains](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/subdomains.png?raw=true)
+![Example subdomains](https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/subdomains.png?raw=true)
 
 ### 2.2. Domain Model
 
@@ -133,7 +133,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 
 #### Example
 
-<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/bounded-context.png?raw=true" alt="Conformist" width="650"/>
+<img src="https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/bounded-context.png?raw=true" alt="Conformist" width="650"/>
 
 - What a `Customer` means in the **Sales** context might be completely different from the **Support** context.
 - That's why we have 2 different `Customer` and `Product` entities, each is tailored for the needs of it's context.
@@ -147,7 +147,7 @@ Let’s say we are building an **EMR** (**Electronic Medical Records**) system f
 - A **Downstream context** is restricted by the dependencies, but does not worry about breaking others.
 - A context can be both.
 
-![context-relationships.png](https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/context-relationships.png?raw=true)
+![context-relationships.png](https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/context-relationships.png?raw=true)
 
 ### 2.5. Context Map
  _Context Maps_ help in understanding the whole project, being able to show the relationships between the different _Bounded Contexts_.
@@ -283,22 +283,22 @@ During the Event Storming process we perform the following steps in sequence:
 
 1.  Identification of Domain Events
 
-<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/1.png?raw=true">
+<img src="https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/1.png?raw=true">
 
 2.  Time Sequencing of Domain Events
 
-<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/2.png?raw=true">
+<img src="https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/2.png?raw=true">
 
 3.  Identification of Triggers/Commands
 
-<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/3.png?raw=true">
+<img src="https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/3.png?raw=true">
 
 4.  Identification of Aggregates
 
-<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/4.png?raw=true">
+<img src="https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/4.png?raw=true">
 
 5.  Identification of Bounded Context
 
-<img src="https://github.com/arahman-osd/clean-code-csharp/blob/master/DDD/resources/5.png?raw=true">
+<img src="https://github.com/OSD-Services/clean-code-csharp/blob/master/DDD/resources/5.png?raw=true">
 
 **[⬆ back to top](#table-of-contents)**
